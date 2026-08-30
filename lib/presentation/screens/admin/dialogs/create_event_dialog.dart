@@ -12,6 +12,7 @@ import '../../../../features/matches/models/match_model.dart';
 import '../../../../features/matches/models/match_status.dart';
 import '../../../../features/matches/models/sport_score.dart';
 import '../../../../features/matches/providers/match_providers.dart';
+import '../../../../core/utils/share_util.dart';
 
 class CreateEventDialog extends ConsumerStatefulWidget {
   const CreateEventDialog({super.key});
@@ -225,7 +226,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Public Link: yourapp.com/event/${_slugController.text.isEmpty ? "your-fest" : _slugController.text}',
+                            'Public Link: ${ShareUtil.getEventShareUrl(_slugController.text.isEmpty ? "your-fest" : _slugController.text)}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primary,

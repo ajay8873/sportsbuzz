@@ -7,13 +7,14 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../features/events/providers/event_providers.dart';
 import '../../common/empty_state_view.dart';
+import '../../../core/utils/share_util.dart';
 import 'dialogs/create_event_dialog.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
   void _copyShareLink(BuildContext context, String shareSlug) {
-    final link = 'https://sportsbuzz.campus/event/$shareSlug';
+    final link = ShareUtil.getEventShareUrl(shareSlug);
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -21,12 +22,12 @@ class AdminDashboardScreen extends ConsumerWidget {
           children: [
             const Icon(LucideIcons.check, size: 16, color: Colors.white),
             const SizedBox(width: 8),
-            Text('Fest link copied to clipboard: /event/$shareSlug'),
+            Expanded(child: Text('Fest link copied: $link')),
           ],
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.primary,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

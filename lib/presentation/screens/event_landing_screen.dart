@@ -13,6 +13,8 @@ import '../../features/matches/providers/match_providers.dart';
 import '../common/empty_state_view.dart';
 import '../widgets/match_card.dart';
 
+import '../../../core/utils/share_util.dart';
+
 class EventLandingScreen extends ConsumerStatefulWidget {
   final String shareSlug;
 
@@ -28,20 +30,20 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
   MatchStatus _selectedStatusTab = MatchStatus.live;
 
   void _copyShareLink() {
-    final link = 'https://sportsbuzz.campus/event/${widget.shareSlug}';
+    final link = ShareUtil.getEventShareUrl(widget.shareSlug);
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
-            Icon(LucideIcons.check, size: 16, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Fest link copied to clipboard!'),
+            const Icon(LucideIcons.check, size: 16, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Fest link copied: $link')),
           ],
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.primary,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

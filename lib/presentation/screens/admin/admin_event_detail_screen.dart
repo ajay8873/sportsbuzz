@@ -18,6 +18,8 @@ import 'dialogs/create_sport_dialog.dart';
 import 'dialogs/create_match_dialog.dart';
 import 'dialogs/edit_match_dialog.dart';
 
+import '../../../core/utils/share_util.dart';
+
 class AdminEventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
 
@@ -34,7 +36,7 @@ class _AdminEventDetailScreenState
   String? _selectedSportId;
 
   void _copyShareLink(String shareSlug) {
-    final link = 'https://sportsbuzz.campus/event/$shareSlug';
+    final link = ShareUtil.getEventShareUrl(shareSlug);
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -42,12 +44,12 @@ class _AdminEventDetailScreenState
           children: [
             const Icon(LucideIcons.check, size: 16, color: Colors.white),
             const SizedBox(width: 8),
-            Text('Fest link copied to clipboard: /event/$shareSlug'),
+            Expanded(child: Text('Fest link copied: $link')),
           ],
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.primary,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

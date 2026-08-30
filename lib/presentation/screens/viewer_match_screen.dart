@@ -17,6 +17,8 @@ import '../widgets/scoreboards/set_based_scoreboard.dart';
 import '../widgets/scoreboards/board_based_scoreboard.dart';
 import '../widgets/scoreboards/match_based_scoreboard.dart';
 
+import '../../../core/utils/share_util.dart';
+
 class ViewerMatchScreen extends ConsumerStatefulWidget {
   final String matchId;
 
@@ -30,20 +32,20 @@ class _ViewerMatchScreenState extends ConsumerState<ViewerMatchScreen> {
   bool _enableVideoSyncDelay = false;
 
   void _copyMatchLink() {
-    final link = 'https://sportsbuzz.campus/match/${widget.matchId}';
+    final link = ShareUtil.getMatchShareUrl(widget.matchId);
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
-            Icon(LucideIcons.check, size: 16, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Match link copied!'),
+            const Icon(LucideIcons.check, size: 16, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Match link copied: $link')),
           ],
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.primary,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
