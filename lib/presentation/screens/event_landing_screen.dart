@@ -25,8 +25,8 @@ class EventLandingScreen extends ConsumerStatefulWidget {
 }
 
 class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
-  SportCategory _category = SportCategory.outdoor;
-  String? _selectedSportId;
+  String _selectedCategory = 'all'; // 'all', 'outdoor', 'indoor'
+  String _selectedSportId = 'all'; // 'all' or specific sport ID
   MatchStatus _selectedStatusTab = MatchStatus.live;
 
   void _copyShareLink() {
@@ -100,32 +100,41 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
         data: (event) {
           if (event == null) {
             return const EmptyStateView(
-              title: 'Event Not Found',
-              message: 'This fest link is not available or has expired.',
+              title: 'Fest Not Found',
+              message:
+                  'The sports fest link may be invalid or has been archived.',
             );
           }
 
           final sportsAsync = ref.watch(sportsForEventProvider(event.id));
 
-          return Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 960),
-              child: SingleChildScrollView(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(eventBySlugProvider(widget.shareSlug));
+              ref.invalidate(sportsForEventProvider(event.id));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Master Fest Header Hero Banner
+                    // Event Header Card
                     Card(
+                      elevation: 0,
+                      color: AppColors.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: AppColors.border),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
                                   child: Column(
@@ -136,17 +145,15 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                                         event.name,
                                         style: Theme.of(context)
                                             .textTheme
-                                            .displayMedium
+                                            .headlineSmall
                                             ?.copyWith(
-                                              fontSize: 24,
                                               fontWeight: FontWeight.w800,
-                                              color: AppColors.primary,
                                             ),
                                       ),
-                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 8),
                                       Wrap(
                                         spacing: 12,
-                                        runSpacing: 4,
+                                        runSpacing: 6,
                                         children: [
                                           Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -216,27 +223,32 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Outdoor / Indoor Segmented Switcher
+                    // Outdoor / Indoor / All Categories Segmented Switcher
                     Row(
                       children: [
-                        SegmentedButton<SportCategory>(
+                        SegmentedButton<String>(
                           segments: const [
                             ButtonSegment(
-                              value: SportCategory.outdoor,
-                              label: Text('Outdoor Sports'),
-                              icon: Icon(LucideIcons.sun, size: 16),
+                              value: 'all',
+                              label: Text('All'),
+                              icon: Icon(LucideIcons.layers, size: 15),
                             ),
                             ButtonSegment(
-                              value: SportCategory.indoor,
-                              label: Text('Indoor Sports'),
-                              icon: Icon(LucideIcons.home, size: 16),
+                              value: 'outdoor',
+                              label: Text('Outdoor'),
+                              icon: Icon(LucideIcons.sun, size: 15),
+                            ),
+                            ButtonSegment(
+                              value: 'indoor',
+                              label: Text('Indoor'),
+                              icon: Icon(LucideIcons.home, size: 15),
                             ),
                           ],
-                          selected: {_category},
+                          selected: {_selectedCategory},
                           onSelectionChanged: (set) {
                             setState(() {
-                              _category = set.first;
-                              _selectedSportId = null;
+                              _selectedCategory = set.first;
+                              _selectedSportId = 'all';
                             });
                           },
                         ),
@@ -244,30 +256,39 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // Horizontally Scrollable Sports Chips
+                    // Horizontally Scrollable Sports Chips with 'All' option by default
                     sportsAsync.when(
                       data: (sports) {
-                        final filteredSports = sports
-                            .where((s) => s.category == _category)
-                            .toList();
-
-                        if (filteredSports.isEmpty) {
+                        if (sports.isEmpty) {
                           return const EmptyStateView(
-                            title: 'No Sports in this Category',
+                            title: 'No Sports Added Yet',
                             message:
-                                'Check back soon as tournament organizers add games.',
+                                'Tournament organizers have not scheduled any games yet.',
                           );
                         }
 
-                        if (_selectedSportId == null &&
-                            filteredSports.isNotEmpty) {
-                          _selectedSportId = filteredSports.first.id;
-                        }
+                        // Filter sports by selected category segment
+                        final filteredSports = sports.where((s) {
+                          if (_selectedCategory == 'outdoor') {
+                            return s.category == SportCategory.outdoor;
+                          } else if (_selectedCategory == 'indoor') {
+                            return s.category == SportCategory.indoor;
+                          }
+                          return true;
+                        }).toList();
 
-                        final currentSport = filteredSports.firstWhere(
-                          (s) => s.id == _selectedSportId,
-                          orElse: () => filteredSports.first,
-                        );
+                        // Map of sport IDs to names for quick lookup
+                        final sportMap = {
+                          for (final s in sports) s.id: s.name,
+                        };
+
+                        // Determine active sport IDs to query matches for
+                        List<String> querySportIds;
+                        if (_selectedSportId == 'all') {
+                          querySportIds = filteredSports.map((s) => s.id).toList();
+                        } else {
+                          querySportIds = [_selectedSportId];
+                        }
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -275,29 +296,45 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: filteredSports.map((sport) {
-                                  final isSelected =
-                                      sport.id == _selectedSportId;
-                                  return Padding(
+                                children: [
+                                  // 'All' Filter Chip (Selected by default)
+                                  Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: ChoiceChip(
-                                      avatar: Icon(
-                                        sport.category == SportCategory.outdoor
-                                            ? LucideIcons.trophy
-                                            : LucideIcons.crown,
-                                        size: 15,
-                                      ),
-                                      label: Text(sport.name),
-                                      selected: isSelected,
+                                      avatar: const Icon(LucideIcons.sparkles, size: 15),
+                                      label: const Text('All Sports'),
+                                      selected: _selectedSportId == 'all',
                                       onSelected: (val) {
                                         if (val) {
-                                          setState(() =>
-                                              _selectedSportId = sport.id);
+                                          setState(() => _selectedSportId = 'all');
                                         }
                                       },
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                  ...filteredSports.map((sport) {
+                                    final isSelected =
+                                        sport.id == _selectedSportId;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 8.0),
+                                      child: ChoiceChip(
+                                        avatar: Icon(
+                                          sport.category == SportCategory.outdoor
+                                              ? LucideIcons.trophy
+                                              : LucideIcons.crown,
+                                          size: 15,
+                                        ),
+                                        label: Text(sport.name),
+                                        selected: isSelected,
+                                        onSelected: (val) {
+                                          if (val) {
+                                            setState(() =>
+                                                _selectedSportId = sport.id);
+                                          }
+                                        },
+                                      ),
+                                    );
+                                  }),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -346,9 +383,10 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Fixtures List for Current Sport and Selected Tab
+                            // Fixtures List for Current Sports & Selected Tab
                             _ViewerMatchesList(
-                              sportId: currentSport.id,
+                              sportIds: querySportIds,
+                              sportMap: sportMap,
                               statusFilter: _selectedStatusTab,
                             ),
                           ],
@@ -429,17 +467,27 @@ class _TabButton extends StatelessWidget {
 }
 
 class _ViewerMatchesList extends ConsumerWidget {
-  final String sportId;
+  final List<String> sportIds;
+  final Map<String, String> sportMap;
   final MatchStatus statusFilter;
 
   const _ViewerMatchesList({
-    required this.sportId,
+    required this.sportIds,
+    required this.sportMap,
     required this.statusFilter,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final matchesAsync = ref.watch(matchesForSportProvider(sportId));
+    if (sportIds.isEmpty) {
+      return EmptyStateView(
+        icon: LucideIcons.calendarX2,
+        title: 'No Matches Found',
+        message: 'No matches have been added for this selection.',
+      );
+    }
+
+    final matchesAsync = ref.watch(matchesForSportIdsProvider(sportIds));
 
     return matchesAsync.when(
       data: (matches) {
@@ -464,7 +512,11 @@ class _ViewerMatchesList extends ConsumerWidget {
           itemCount: filteredMatches.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
-            return MatchCard(match: filteredMatches[index]);
+            final match = filteredMatches[index];
+            return MatchCard(
+              match: match,
+              sportName: sportMap[match.sportId],
+            );
           },
         );
       },

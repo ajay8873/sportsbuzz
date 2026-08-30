@@ -11,8 +11,13 @@ import '../common/status_badge.dart';
 
 class MatchCard extends ConsumerWidget {
   final MatchModel match;
+  final String? sportName;
 
-  const MatchCard({super.key, required this.match});
+  const MatchCard({
+    super.key,
+    required this.match,
+    this.sportName,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,24 +40,67 @@ class MatchCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Stage & Status Badge
+              // Header: Sport Name Badge, Stage & Status Badge
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(LucideIcons.trophy,
-                          size: 14, color: AppColors.textMuted),
-                      const SizedBox(width: 6),
-                      Text(
-                        match.stage ?? 'Fixture',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (sportName != null && sportName!.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 3.5),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.activity,
+                                    size: 12, color: AppColors.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  sportName!.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(LucideIcons.trophy,
+                                  size: 13, color: AppColors.textMuted),
+                              const SizedBox(width: 5),
+                              Flexible(
+                                child: Text(
+                                  match.stage ?? 'Fixture',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   StatusBadge(status: match.status, compact: true),
                 ],

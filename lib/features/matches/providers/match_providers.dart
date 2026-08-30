@@ -19,6 +19,12 @@ final matchesForSportProvider =
   return dao.getMatchesBySport(sportId);
 });
 
+final matchesForSportIdsProvider =
+    FutureProvider.family<List<MatchModel>, List<String>>((ref, sportIds) async {
+  final dao = ref.watch(matchDaoProvider);
+  return dao.getMatchesBySportIds(sportIds);
+});
+
 final matchByIdProvider =
     FutureProvider.family<MatchModel?, String>((ref, matchId) async {
   final dao = ref.watch(matchDaoProvider);

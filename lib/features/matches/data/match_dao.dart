@@ -7,22 +7,27 @@ class MatchDao {
   static final List<MatchModel> _mockMatches = [];
 
   Future<List<MatchModel>> getMatchesBySport(String sportId) async {
+    return getMatchesBySportIds([sportId]);
+  }
+
+  Future<List<MatchModel>> getMatchesBySportIds(List<String> sportIds) async {
+    if (sportIds.isEmpty) return [];
     final client = SupabaseConfig.client;
     if (client != null && SupabaseConfig.isInitialized) {
       try {
         final response = await client
             .from('matches')
             .select()
-            .eq('sport_id', sportId)
+            .inFilter('sport_id', sportIds)
             .order('scheduled_time', ascending: true);
         return (response as List<dynamic>)
             .map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
             .toList();
       } catch (e) {
-        debugPrint('Supabase getMatchesBySport error: $e');
+        debugPrint('Supabase getMatchesBySportIds error: $e');
       }
     }
-    return _mockMatches.where((m) => m.sportId == sportId).toList();
+    return _mockMatches.where((m) => sportIds.contains(m.sportId)).toList();
   }
 
   Future<MatchModel?> getMatchById(String matchId) async {

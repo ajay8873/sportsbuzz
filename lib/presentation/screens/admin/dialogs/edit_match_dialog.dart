@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../features/matches/models/match_model.dart';
 import '../../../../features/matches/models/match_status.dart';
 import '../../../../features/matches/providers/match_providers.dart';
+import '../../../widgets/stream_guide_dialog.dart';
 
 class EditMatchDialog extends ConsumerStatefulWidget {
   final MatchModel match;
@@ -196,12 +198,42 @@ class _EditMatchDialogState extends ConsumerState<EditMatchDialog> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Row 5: YouTube Live / Stream URL
+                  // Row 5: Live Video Stream URL
                   TextFormField(
                     controller: _streamUrlController,
                     decoration: const InputDecoration(
-                      labelText: 'YouTube Live / Stream URL (Optional)',
+                      labelText: 'Live Video Stream URL (Optional)',
+                      hintText: 'VDO.Ninja / YouTube / Livepeer / Twitch link',
                       prefixIcon: Icon(LucideIcons.video, size: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      onTap: () => StreamGuideDialog.show(context),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 2.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(LucideIcons.helpCircle,
+                                size: 13, color: AppColors.primary),
+                            const SizedBox(width: 5),
+                            const Text(
+                              'How to get stream link? (Step-by-step guide)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
