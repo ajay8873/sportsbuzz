@@ -3,15 +3,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseConfig {
   SupabaseConfig._();
 
-  // Configurable URL and Anon Key. In production, pass via String.fromEnvironment
+  // Configurable URL and Anon Key
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://xyzcompany.supabase.co',
+    defaultValue: 'https://xskpdmbqntvgbujktpke.supabase.co',
   );
 
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'public-anon-key-placeholder',
+    defaultValue: 'sb_publishable_Gw_z6b8dIysnrJT2AVKNGA_D1q3UHHp',
   );
 
   static bool _isInitialized = false;
