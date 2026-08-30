@@ -60,15 +60,17 @@ class VideoPlayerEmbed extends StatelessWidget {
                           ),
                         ),
                         child: const Icon(
-                          LucideIcons.tv,
+                          LucideIcons.radio,
                           color: AppColors.liveRed,
                           size: 40,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'YouTube Live Stream Feed Active',
-                        style: TextStyle(
+                      Text(
+                        streamUrl!.contains('.m3u8') || streamUrl!.contains('livepeer') || streamUrl!.contains('cloudflare')
+                            ? 'Live HD Broadcast Stream Active'
+                            : 'Live Video Broadcast Feed Active',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
