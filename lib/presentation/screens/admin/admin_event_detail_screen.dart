@@ -54,6 +54,41 @@ class _AdminEventDetailScreenState
     );
   }
 
+  void _confirmDeleteSport(SportModel sport) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Sport?'),
+        content: Text(
+          'Are you sure you want to remove "${sport.name}" and all of its scheduled fixtures from this fest?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.liveRed),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await ref.read(sportDaoProvider).deleteSport(sport.id);
+              ref.invalidate(sportsForEventProvider(widget.eventId));
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Sport "${sport.name}" removed'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            child: const Text('Delete Sport'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final eventAsync = ref.watch(eventByIdProvider(widget.eventId));
@@ -359,24 +394,37 @@ class _AdminEventDetailScreenState
                                     ),
                                   ],
                                 ),
-                                  ElevatedButton.icon(
-                                    icon: const Icon(LucideIcons.plus,
-                                        size: 16),
-                                    label: const Text('Schedule Match'),
-                                    onPressed: () async {
-                                      final created = await showDialog(
-                                        context: context,
-                                        builder: (_) => CreateMatchDialog(
-                                          sportId: selectedSport.id,
-                                          sportName: selectedSport.name,
-                                          scoringModel:
-                                              selectedSport.scoringModel,
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColors.liveRed,
+                                          side: BorderSide(color: AppColors.liveRed.withValues(alpha: 0.4)),
                                         ),
-                                      );
-                                      if (created != null) {
-                                        ref.invalidate(matchesForSportProvider(selectedSport.id));
-                                      }
-                                    },
+                                        icon: const Icon(LucideIcons.trash2, size: 15),
+                                        label: const Text('Delete Sport'),
+                                        onPressed: () => _confirmDeleteSport(selectedSport),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        icon: const Icon(LucideIcons.plus, size: 16),
+                                        label: const Text('Schedule Match'),
+                                        onPressed: () async {
+                                          final created = await showDialog(
+                                            context: context,
+                                            builder: (_) => CreateMatchDialog(
+                                              sportId: selectedSport.id,
+                                              sportName: selectedSport.name,
+                                              scoringModel: selectedSport.scoringModel,
+                                            ),
+                                          );
+                                          if (created != null) {
+                                            ref.invalidate(matchesForSportProvider(selectedSport.id));
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
                               ],
                             ),

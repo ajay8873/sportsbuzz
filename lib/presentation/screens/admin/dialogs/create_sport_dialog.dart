@@ -173,29 +173,7 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
     final dao = ref.read(sportDaoProvider);
     await dao.createSport(newSport);
 
-    // Auto-create initial fixture
-    final matchDao = ref.read(matchDaoProvider);
-    final stateDao = ref.read(matchStateDaoProvider);
-    final newMatch = MatchModel(
-      id: uuid.v4(),
-      sportId: newSport.id,
-      title: 'Dept of CS vs Dept of ME',
-      teamA: 'Dept of CS',
-      teamB: 'Dept of ME',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 2)),
-      venue: 'Main Ground / Court',
-      stage: 'League Match',
-      createdAt: DateTime.now(),
-    );
-    await matchDao.createMatch(newMatch);
-    await stateDao.updateScore(
-      matchId: newMatch.id,
-      newScore: SportScore.createInitial(newSport.scoringModel, sportName: newSport.name),
-    );
-
     ref.invalidate(sportsForEventProvider(widget.eventId));
-    ref.invalidate(matchesForSportProvider(newSport.id));
 
     if (mounted) {
       Navigator.of(context).pop(newSport);
