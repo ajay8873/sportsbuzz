@@ -26,9 +26,9 @@ final matchesForSportIdsProvider =
 });
 
 final matchByIdProvider =
-    FutureProvider.family<MatchModel?, String>((ref, matchId) async {
+    StreamProvider.family<MatchModel?, String>((ref, matchId) {
   final dao = ref.watch(matchDaoProvider);
-  return dao.getMatchById(matchId);
+  return dao.streamMatchById(matchId);
 });
 
 final selectedMatchTabStatusProvider =

@@ -49,6 +49,27 @@ class MatchDao {
     return _mockMatches.where((m) => m.id == matchId).firstOrNull;
   }
 
+  Stream<MatchModel?> streamMatchById(String matchId) {
+    final client = SupabaseConfig.client;
+    if (client != null && SupabaseConfig.isInitialized) {
+      try {
+        return client
+            .from('matches')
+            .stream(primaryKey: ['id'])
+            .eq('id', matchId)
+            .map((maps) {
+              if (maps.isNotEmpty) {
+                return MatchModel.fromJson(maps.first);
+              }
+              return null;
+            });
+      } catch (e) {
+        debugPrint('Supabase streamMatchById error: $e');
+      }
+    }
+    return Stream.value(_mockMatches.where((m) => m.id == matchId).firstOrNull);
+  }
+
   Future<MatchModel> createMatch(MatchModel match) async {
     final client = SupabaseConfig.client;
     if (client != null && SupabaseConfig.isInitialized) {
