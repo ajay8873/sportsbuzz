@@ -311,7 +311,7 @@ class _RunBasedScoreboardState extends State<RunBasedScoreboard> {
             leading: const Icon(LucideIcons.fileText,
                 size: 18, color: AppColors.primary),
             title: Text(
-              'Detailed Match Scorecard (${displayBattingTeam})',
+              'Detailed Match Scorecard ($displayBattingTeam)',
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             ),
             children: [
@@ -373,111 +373,198 @@ class _RunBasedScoreboardState extends State<RunBasedScoreboard> {
                     const SizedBox(height: 4),
 
                     // Batting List
-                    if (score.battingScorecard.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Text('${score.striker} *',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ),
-                            Expanded(
-                                child: Text('${score.strikerRuns}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 12))),
-                            Expanded(
-                                child: Text('${score.strikerBalls}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 12))),
-                            const Expanded(
-                                child: Text('-', textAlign: TextAlign.center)),
-                            const Expanded(
-                                child: Text('-', textAlign: TextAlign.center)),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                score.strikerBalls > 0
-                                    ? ((score.strikerRuns / score.strikerBalls) *
-                                            100)
-                                        .toStringAsFixed(1)
-                                    : '0.0',
-                                textAlign: TextAlign.end,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ...score.battingScorecard.map((b) {
-                        final isCurrentlyAtCrease =
-                            b.name == score.striker || b.name == score.nonStriker;
-                        final isStriker = b.name == score.striker;
+                    Builder(
+                      builder: (context) {
+                        final displayBattingList = score.battingScorecard.where((b) {
+                          final isDummy = (b.name == 'Striker 1' || b.name == 'Striker 2');
+                          if (isDummy &&
+                              score.striker != b.name &&
+                              score.nonStriker != b.name &&
+                              b.runs == 0 &&
+                              b.balls == 0 &&
+                              !b.isOut) {
+                            return false;
+                          }
+                          return true;
+                        }).toList();
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
+                        if (displayBattingList.isEmpty) {
+                          return Column(
                             children: [
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      '${b.name} ${isStriker ? '*' : ''}',
-                                      style: TextStyle(
-                                        fontWeight: isCurrentlyAtCrease
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        fontSize: 12,
-                                        color: isCurrentlyAtCrease
-                                            ? AppColors.primary
-                                            : AppColors.textPrimary,
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${score.striker} *',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                                color: AppColors.primary),
+                                          ),
+                                          const Text('not out',
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: AppColors.textMuted)),
+                                        ],
                                       ),
                                     ),
-                                    Text(
-                                      b.isOut ? b.dismissal : 'not out',
-                                      style: const TextStyle(
-                                          fontSize: 10,
-                                          color: AppColors.textMuted),
+                                    Expanded(
+                                        child: Text('${score.strikerRuns}',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12))),
+                                    Expanded(
+                                        child: Text('${score.strikerBalls}',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(fontSize: 12))),
+                                    const Expanded(
+                                        child: Text('-', textAlign: TextAlign.center)),
+                                    const Expanded(
+                                        child: Text('-', textAlign: TextAlign.center)),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        score.strikerBalls > 0
+                                            ? ((score.strikerRuns / score.strikerBalls) * 100)
+                                                .toStringAsFixed(1)
+                                            : '0.0',
+                                        textAlign: TextAlign.end,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                  child: Text('${b.runs}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12))),
-                              Expanded(
-                                  child: Text('${b.balls}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                  child: Text('${b.fours}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                  child: Text('${b.sixes}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  b.strikeRate.toStringAsFixed(1),
-                                  textAlign: TextAlign.end,
-                                  style: const TextStyle(fontSize: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            score.nonStriker,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12),
+                                          ),
+                                          const Text('not out',
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: AppColors.textMuted)),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                        child: Text('${score.nonStrikerRuns}',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12))),
+                                    Expanded(
+                                        child: Text('${score.nonStrikerBalls}',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(fontSize: 12))),
+                                    const Expanded(
+                                        child: Text('-', textAlign: TextAlign.center)),
+                                    const Expanded(
+                                        child: Text('-', textAlign: TextAlign.center)),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        score.nonStrikerBalls > 0
+                                            ? ((score.nonStrikerRuns / score.nonStrikerBalls) * 100)
+                                                .toStringAsFixed(1)
+                                            : '0.0',
+                                        textAlign: TextAlign.end,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
-                          ),
+                          );
+                        }
+
+                        return Column(
+                          children: displayBattingList.map((b) {
+                            final isCurrentlyAtCrease =
+                                b.name == score.striker || b.name == score.nonStriker;
+                            final isStriker = b.name == score.striker;
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${b.name} ${isStriker ? '*' : ''}',
+                                          style: TextStyle(
+                                            fontWeight: isCurrentlyAtCrease
+                                                ? FontWeight.w700
+                                                : FontWeight.w500,
+                                            fontSize: 12,
+                                            color: isCurrentlyAtCrease
+                                                ? AppColors.primary
+                                                : AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          b.isOut ? b.dismissal : 'not out',
+                                          style: const TextStyle(
+                                              fontSize: 10,
+                                              color: AppColors.textMuted),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text('${b.runs}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${b.balls}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${b.fours}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${b.sixes}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      b.strikeRate.toStringAsFixed(1),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                         );
-                      }),
+                      },
+                    ),
 
                     const Divider(height: 18),
 
@@ -534,100 +621,119 @@ class _RunBasedScoreboardState extends State<RunBasedScoreboard> {
                     const SizedBox(height: 4),
 
                     // Bowling List
-                    if (score.bowlingScorecard.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Text(score.currentBowler,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ),
-                            Expanded(
-                                child: Text(score.bowlerOvers.toStringAsFixed(1),
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 12))),
-                            const Expanded(
-                                child: Text('0', textAlign: TextAlign.center)),
-                            Expanded(
-                                child: Text('${score.bowlerRunsConceded}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 12))),
-                            Expanded(
-                                child: Text('${score.bowlerWickets}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 12))),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                score.bowlerOvers > 0
-                                    ? (score.bowlerRunsConceded /
-                                            score.bowlerOvers)
-                                        .toStringAsFixed(1)
-                                    : '0.0',
-                                textAlign: TextAlign.end,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ...score.bowlingScorecard.map((bw) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  bw.name,
-                                  style: TextStyle(
-                                    fontWeight: bw.name == score.currentBowler
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    fontSize: 12,
-                                    color: bw.name == score.currentBowler
-                                        ? AppColors.primary
-                                        : AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                  child: Text(bw.overs.toStringAsFixed(1),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                  child: Text('${bw.maidens}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                  child: Text('${bw.runs}',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12))),
-                              Expanded(
-                                  child: Text('${bw.wickets}',
-                                      textAlign: TextAlign.center,
+                    Builder(
+                      builder: (context) {
+                        final displayBowlingList = score.bowlingScorecard.where((bw) {
+                          final isDummy = bw.name == 'Bowler 1';
+                          if (isDummy &&
+                              score.currentBowler != 'Bowler 1' &&
+                              bw.overs == 0 &&
+                              bw.runs == 0 &&
+                              bw.wickets == 0) {
+                            return false;
+                          }
+                          return true;
+                        }).toList();
+
+                        if (displayBowlingList.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(score.currentBowler,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 12))),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  bw.economy.toStringAsFixed(1),
-                                  textAlign: TextAlign.end,
-                                  style: const TextStyle(fontSize: 12),
+                                          fontSize: 12,
+                                          color: AppColors.primary)),
                                 ),
+                                Expanded(
+                                    child: Text(score.bowlerOvers.toStringAsFixed(1),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 12))),
+                                const Expanded(
+                                    child: Text('0', textAlign: TextAlign.center)),
+                                Expanded(
+                                    child: Text('${score.bowlerRunsConceded}',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 12))),
+                                Expanded(
+                                    child: Text('${score.bowlerWickets}',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12))),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    score.bowlerOvers > 0
+                                        ? (score.bowlerRunsConceded / score.bowlerOvers)
+                                            .toStringAsFixed(1)
+                                        : '0.0',
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: displayBowlingList.map((bw) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      bw.name,
+                                      style: TextStyle(
+                                        fontWeight: bw.name == score.currentBowler
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        fontSize: 12,
+                                        color: bw.name == score.currentBowler
+                                            ? AppColors.primary
+                                            : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text(bw.overs.toStringAsFixed(1),
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${bw.maidens}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${bw.runs}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 12))),
+                                  Expanded(
+                                      child: Text('${bw.wickets}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12))),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      bw.economy.toStringAsFixed(1),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            );
+                          }).toList(),
                         );
-                      }),
+                      },
+                    ),
 
                     const Divider(height: 18),
                     // Extras summary

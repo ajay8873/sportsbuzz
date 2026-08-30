@@ -222,13 +222,15 @@ class _EditMatchDialogState extends ConsumerState<EditMatchDialog> {
                             const Icon(LucideIcons.helpCircle,
                                 size: 13, color: AppColors.primary),
                             const SizedBox(width: 5),
-                            const Text(
-                              'How to get stream link? (Step-by-step guide)',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                                decoration: TextDecoration.underline,
+                            const Flexible(
+                              child: Text(
+                                'How to get stream link? (Step-by-step guide)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ],

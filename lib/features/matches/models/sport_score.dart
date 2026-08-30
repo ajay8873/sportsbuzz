@@ -26,13 +26,8 @@ sealed class SportScore {
           striker: 'Striker 1',
           nonStriker: 'Striker 2',
           currentBowler: 'Bowler 1',
-          battingScorecard: [
-            const BattingEntry(name: 'Striker 1', dismissal: 'not out'),
-            const BattingEntry(name: 'Striker 2', dismissal: 'not out'),
-          ],
-          bowlingScorecard: [
-            const BowlingEntry(name: 'Bowler 1'),
-          ],
+          battingScorecard: const [],
+          bowlingScorecard: const [],
         );
       case ScoringModel.timeBased:
         return const TimeBasedScore();

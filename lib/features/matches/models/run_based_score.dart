@@ -144,6 +144,8 @@ class RunBasedScore extends SportScore {
   final String? tossWinner;
   final String? tossDecision;
   final String? tossSummary;
+  final List<String> teamASquad;
+  final List<String> teamBSquad;
   final List<BattingEntry> battingScorecard;
   final List<BowlingEntry> bowlingScorecard;
 
@@ -176,6 +178,8 @@ class RunBasedScore extends SportScore {
     this.tossWinner,
     this.tossDecision,
     this.tossSummary,
+    this.teamASquad = const [],
+    this.teamBSquad = const [],
     this.battingScorecard = const [],
     this.bowlingScorecard = const [],
   });
@@ -216,6 +220,8 @@ class RunBasedScore extends SportScore {
     String? tossWinner,
     String? tossDecision,
     String? tossSummary,
+    List<String>? teamASquad,
+    List<String>? teamBSquad,
     List<BattingEntry>? battingScorecard,
     List<BowlingEntry>? bowlingScorecard,
   }) {
@@ -248,6 +254,8 @@ class RunBasedScore extends SportScore {
       tossWinner: tossWinner ?? this.tossWinner,
       tossDecision: tossDecision ?? this.tossDecision,
       tossSummary: tossSummary ?? this.tossSummary,
+      teamASquad: teamASquad ?? this.teamASquad,
+      teamBSquad: teamBSquad ?? this.teamBSquad,
       battingScorecard: battingScorecard ?? this.battingScorecard,
       bowlingScorecard: bowlingScorecard ?? this.bowlingScorecard,
     );
@@ -285,6 +293,8 @@ class RunBasedScore extends SportScore {
       'tossWinner': tossWinner,
       'tossDecision': tossDecision,
       'tossSummary': tossSummary,
+      'teamASquad': teamASquad,
+      'teamBSquad': teamBSquad,
       'battingScorecard': battingScorecard.map((e) => e.toJson()).toList(),
       'bowlingScorecard': bowlingScorecard.map((e) => e.toJson()).toList(),
     };
@@ -323,6 +333,14 @@ class RunBasedScore extends SportScore {
       tossWinner: json['tossWinner'] as String?,
       tossDecision: json['tossDecision'] as String?,
       tossSummary: json['tossSummary'] as String?,
+      teamASquad: (json['teamASquad'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      teamBSquad: (json['teamBSquad'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
       battingScorecard: (json['battingScorecard'] as List<dynamic>?)
               ?.map((e) => BattingEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??

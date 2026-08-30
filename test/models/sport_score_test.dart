@@ -190,5 +190,32 @@ void main() {
       expect(deserialized.bowlingScorecard.length, 1);
       expect(deserialized.bowlingScorecard.first.name, 'Bumrah');
     });
+
+    test('RunBasedScore squad roster and retired hurt status serialization', () {
+      const score = RunBasedScore(
+        runs: 54,
+        wickets: 1,
+        overs: 6.0,
+        balls: 0,
+        teamASquad: ['Rohit', 'Shubman', 'Virat', 'KL Rahul', 'Hardik'],
+        teamBSquad: ['Bumrah', 'Shami', 'Siraj', 'Kuldeep', 'Jadeja'],
+        battingScorecard: [
+          BattingEntry(name: 'Rohit', runs: 28, balls: 18, isOut: true, dismissal: 'bowled'),
+          BattingEntry(name: 'Shubman', runs: 22, balls: 14, isOut: false, dismissal: 'retired hurt'),
+          BattingEntry(name: 'Virat', runs: 4, balls: 4, isOut: false, dismissal: 'not out'),
+        ],
+      );
+
+      final json = score.toJson();
+      expect(json['teamASquad'], ['Rohit', 'Shubman', 'Virat', 'KL Rahul', 'Hardik']);
+      expect(json['teamBSquad'], ['Bumrah', 'Shami', 'Siraj', 'Kuldeep', 'Jadeja']);
+
+      final deserialized = SportScore.fromJson(json) as RunBasedScore;
+      expect(deserialized.teamASquad.length, 5);
+      expect(deserialized.teamBSquad.length, 5);
+      expect(deserialized.battingScorecard[1].dismissal, 'retired hurt');
+      expect(deserialized.battingScorecard[1].isOut, isFalse);
+    });
   });
 }
+
