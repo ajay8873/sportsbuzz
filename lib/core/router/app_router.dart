@@ -20,26 +20,33 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           return const HomeScreen();
         },
-        routes: <RouteBase>[
-          // Master shareable event URL: /event/:share_slug
-          GoRoute(
-            path: 'event/:share_slug',
-            name: 'eventLanding',
-            builder: (BuildContext context, GoRouterState state) {
-              final shareSlug = state.pathParameters['share_slug'] ?? '';
-              return EventLandingScreen(shareSlug: shareSlug);
-            },
-          ),
-          // Direct Live Match Viewer URL: /match/:match_id
-          GoRoute(
-            path: 'match/:match_id',
-            name: 'viewerMatch',
-            builder: (BuildContext context, GoRouterState state) {
-              final matchId = state.pathParameters['match_id'] ?? '';
-              return ViewerMatchScreen(matchId: matchId);
-            },
-          ),
-        ],
+      ),
+      // Master shareable event URL: /event/:share_slug
+      GoRoute(
+        path: '/event/:share_slug',
+        name: 'eventLanding',
+        builder: (BuildContext context, GoRouterState state) {
+          final shareSlug = state.pathParameters['share_slug'] ?? '';
+          return EventLandingScreen(shareSlug: shareSlug);
+        },
+      ),
+      // Direct Live Match Viewer URL: /match/:match_id
+      GoRoute(
+        path: '/match/:match_id',
+        name: 'viewerMatch',
+        builder: (BuildContext context, GoRouterState state) {
+          final matchId = state.pathParameters['match_id'] ?? '';
+          return ViewerMatchScreen(matchId: matchId);
+        },
+      ),
+      // Plural alias for match viewer: /matches/:match_id
+      GoRoute(
+        path: '/matches/:match_id',
+        name: 'viewerMatches',
+        builder: (BuildContext context, GoRouterState state) {
+          final matchId = state.pathParameters['match_id'] ?? '';
+          return ViewerMatchScreen(matchId: matchId);
+        },
       ),
 
       // Admin & Scorer Console Routes
