@@ -15,6 +15,8 @@ import 'scorepads/time_based_scorepad.dart';
 import 'scorepads/set_based_scorepad.dart';
 import 'scorepads/board_based_scorepad.dart';
 import 'scorepads/match_based_scorepad.dart';
+import '../../../features/events/providers/event_providers.dart';
+import '../../../core/services/admin_auth_service.dart';
 
 class AdminScoringScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -97,6 +99,59 @@ class _AdminScoringScreenState extends ConsumerState<AdminScoringScreen> {
 
           final sportAsync = ref.watch(sportByIdProvider(match.sportId));
           final sport = sportAsync.valueOrNull;
+
+          if (sport != null && !ref.watch(unlockedEventsProvider).contains(sport.eventId)) {
+            final eventAsync = ref.watch(eventByIdProvider(sport.eventId));
+            final event = eventAsync.valueOrNull;
+
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primarySurface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        LucideIcons.lock,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Scorer Passcode Required',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enter the 4-digit PIN for this tournament to unlock live scoring controls for "${match.title}".',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: const Icon(LucideIcons.keyRound, size: 18),
+                      label: const Text('Enter Organizer / Scorer PIN'),
+                      onPressed: () {
+                        if (event != null) {
+                          AdminAuthService.promptPin(
+                            context: context,
+                            ref: ref,
+                            event: event,
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
           final streamParams = MatchStreamParams(
             matchId: widget.matchId,

@@ -6,6 +6,7 @@ class EventModel {
   final String shareSlug;
   final String? description;
   final String? venue;
+  final String? adminPin;
   final DateTime? createdAt;
 
   const EventModel({
@@ -16,6 +17,7 @@ class EventModel {
     required this.shareSlug,
     this.description,
     this.venue,
+    this.adminPin,
     this.createdAt,
   });
 
@@ -27,6 +29,7 @@ class EventModel {
     String? shareSlug,
     String? description,
     String? venue,
+    String? adminPin,
     DateTime? createdAt,
   }) {
     return EventModel(
@@ -37,6 +40,7 @@ class EventModel {
       shareSlug: shareSlug ?? this.shareSlug,
       description: description ?? this.description,
       venue: venue ?? this.venue,
+      adminPin: adminPin ?? this.adminPin,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -50,6 +54,7 @@ class EventModel {
       'share_slug': shareSlug,
       if (description != null) 'description': description,
       if (venue != null) 'venue': venue,
+      if (adminPin != null) 'admin_pin': adminPin,
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
     };
   }
@@ -63,6 +68,7 @@ class EventModel {
       shareSlug: json['share_slug'] as String,
       description: json['description'] as String?,
       venue: json['venue'] as String?,
+      adminPin: json['admin_pin'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,

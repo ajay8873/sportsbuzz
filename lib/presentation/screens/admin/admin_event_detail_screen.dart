@@ -17,8 +17,8 @@ import '../../common/status_badge.dart';
 import 'dialogs/create_sport_dialog.dart';
 import 'dialogs/create_match_dialog.dart';
 import 'dialogs/edit_match_dialog.dart';
-
 import '../../../core/utils/share_util.dart';
+import '../../../core/services/admin_auth_service.dart';
 
 class AdminEventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
@@ -98,6 +98,52 @@ class _AdminEventDetailScreenState
             return const EmptyStateView(
               title: 'Fest Not Found',
               message: 'The requested event could not be found.',
+            );
+          }
+
+          if (!ref.watch(unlockedEventsProvider).contains(widget.eventId)) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primarySurface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        LucideIcons.lock,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Organizer Passcode Required',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enter the 4-digit PIN for "${event.name}" to manage sports, schedule fixtures, and access live scorers.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: const Icon(LucideIcons.keyRound, size: 18),
+                      label: const Text('Enter Organizer PIN'),
+                      onPressed: () => AdminAuthService.promptPin(
+                        context: context,
+                        ref: ref,
+                        event: event,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           }
 

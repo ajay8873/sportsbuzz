@@ -15,6 +15,8 @@ import '../../../../features/matches/providers/match_providers.dart';
 import '../../../../core/utils/share_util.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/services/admin_auth_service.dart';
+
 class CreateEventDialog extends ConsumerStatefulWidget {
   const CreateEventDialog({super.key});
 
@@ -28,6 +30,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
   final _slugController = TextEditingController();
   final _venueController = TextEditingController();
   final _descController = TextEditingController();
+  final _pinController = TextEditingController(text: '1234');
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 3));
@@ -38,6 +41,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     _slugController.dispose();
     _venueController.dispose();
     _descController.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -67,6 +71,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
       shareSlug: _slugController.text.trim().toLowerCase(),
       venue: _venueController.text.trim(),
       description: _descController.text.trim(),
+      adminPin: _pinController.text.trim().isEmpty ? '1234' : _pinController.text.trim(),
       startDate: _startDate,
       endDate: _endDate,
       createdAt: DateTime.now(),
@@ -74,6 +79,9 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
 
     final dao = ref.read(eventDaoProvider);
     await dao.createEvent(newEvent);
+
+    // Auto-unlock for event creator in this session
+    ref.read(unlockedEventsProvider.notifier).unlock(newEvent.id);
 
     ref.invalidate(allEventsProvider);
     ref.invalidate(sportsForEventProvider(newEvent.id));
@@ -133,6 +141,21 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
                     ),
                     validator: (v) =>
                         v == null || v.isEmpty ? 'Please enter slug' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _pinController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 8,
+                    decoration: const InputDecoration(
+                      labelText: 'Organizer / Scorer PIN *',
+                      hintText: 'e.g. 1234',
+                      counterText: '',
+                      prefixIcon: Icon(LucideIcons.lock, size: 18),
+                      helperText: 'Passcode required to edit matches & live scorecards',
+                    ),
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Please enter an organizer PIN' : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(

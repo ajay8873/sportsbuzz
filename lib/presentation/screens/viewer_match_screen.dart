@@ -17,6 +17,8 @@ import '../widgets/scoreboards/set_based_scoreboard.dart';
 import '../widgets/scoreboards/board_based_scoreboard.dart';
 import '../widgets/scoreboards/match_based_scoreboard.dart';
 
+import '../../features/events/providers/event_providers.dart';
+import '../../core/services/admin_auth_service.dart';
 import '../../../core/utils/share_util.dart';
 
 class ViewerMatchScreen extends ConsumerStatefulWidget {
@@ -73,9 +75,26 @@ class _ViewerMatchScreenState extends ConsumerState<ViewerMatchScreen> {
           ),
           IconButton(
             icon: const Icon(LucideIcons.shieldCheck),
-            tooltip: 'Scorer Controller',
-            onPressed: () =>
-                context.push('/admin/matches/${widget.matchId}/score'),
+            tooltip: 'Scorer Login',
+            onPressed: () async {
+              final match = matchAsync.valueOrNull;
+              if (match == null) return;
+              final sport = await ref.read(sportDaoProvider).getSportById(match.sportId);
+              if (sport == null) return;
+              final event = await ref.read(eventDaoProvider).getEventById(sport.eventId);
+              if (event == null) return;
+
+              if (context.mounted) {
+                final ok = await AdminAuthService.promptPin(
+                  context: context,
+                  ref: ref,
+                  event: event,
+                );
+                if (ok && context.mounted) {
+                  context.push('/admin/matches/${widget.matchId}/score');
+                }
+              }
+            },
           ),
         ],
       ),

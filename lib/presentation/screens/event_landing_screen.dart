@@ -12,8 +12,8 @@ import '../../features/matches/models/match_status.dart';
 import '../../features/matches/providers/match_providers.dart';
 import '../common/empty_state_view.dart';
 import '../widgets/match_card.dart';
-
 import '../../../core/utils/share_util.dart';
+import '../../core/services/admin_auth_service.dart';
 
 class EventLandingScreen extends ConsumerStatefulWidget {
   final String shareSlug;
@@ -80,8 +80,19 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
           ),
           IconButton(
             icon: const Icon(LucideIcons.shieldCheck),
-            tooltip: 'Admin / Scorer Console',
-            onPressed: () => context.push('/admin'),
+            tooltip: 'Organizer & Scorer Login',
+            onPressed: () async {
+              final event = eventAsync.valueOrNull;
+              if (event == null) return;
+              final ok = await AdminAuthService.promptPin(
+                context: context,
+                ref: ref,
+                event: event,
+              );
+              if (ok && context.mounted) {
+                context.push('/admin/events/${event.id}');
+              }
+            },
           ),
         ],
       ),
