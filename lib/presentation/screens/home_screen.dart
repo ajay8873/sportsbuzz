@@ -126,6 +126,7 @@ class HomeScreen extends ConsumerWidget {
                                 builder: (_) => const CreateEventDialog(),
                               );
                               if (createdEvent != null && context.mounted) {
+                                ref.invalidate(allEventsProvider);
                                 context.push('/admin/events/${createdEvent.id}');
                               }
                             },

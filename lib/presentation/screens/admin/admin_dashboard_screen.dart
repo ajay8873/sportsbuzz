@@ -69,11 +69,15 @@ class AdminDashboardScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text('Create New Fest'),
-        onPressed: () {
-          showDialog(
+        onPressed: () async {
+          final newEvent = await showDialog<EventModel?>(
             context: context,
             builder: (_) => const CreateEventDialog(),
           );
+          if (newEvent != null && context.mounted) {
+            ref.invalidate(allEventsProvider);
+            context.push('/admin/events/${newEvent.id}');
+          }
         },
       ),
       body: Align(
