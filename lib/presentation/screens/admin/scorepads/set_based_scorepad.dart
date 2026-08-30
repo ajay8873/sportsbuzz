@@ -176,20 +176,62 @@ class SetBasedScorepad extends StatelessWidget {
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Text(
-                        'SET ${score.currentSetNumber} OF ${score.maxSets}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Change Match Sets Format'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [1, 3, 5, 7, 9].map((sets) {
+                                return ListTile(
+                                  title: Text(
+                                    sets == 1
+                                        ? '1 Single Set (Sudden Death)'
+                                        : 'Best of $sets Sets (First to ${(sets / 2).ceil()} wins)',
+                                  ),
+                                  trailing: score.maxSets == sets
+                                      ? const Icon(LucideIcons.check,
+                                          color: AppColors.primary)
+                                      : null,
+                                  onTap: () {
+                                    onScoreChanged(
+                                        score.copyWith(maxSets: sets));
+                                    Navigator.of(ctx).pop();
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primarySurface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'SET ${score.currentSetNumber} OF ${score.maxSets}',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(LucideIcons.chevronDown,
+                                size: 14, color: AppColors.primary),
+                          ],
                         ),
                       ),
                     ),

@@ -34,6 +34,7 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
   final _stageController = TextEditingController(text: 'League Match');
   final _venueController = TextEditingController();
   final _streamUrlController = TextEditingController();
+  int _maxSets = 3;
 
   DateTime _scheduledTime = DateTime.now().add(const Duration(hours: 1));
 
@@ -106,6 +107,7 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
     final initialScore = SportScore.createInitial(
       widget.scoringModel,
       sportName: widget.sportName,
+      maxSets: _maxSets,
     );
     final stateDao = ref.read(matchStateDaoProvider);
     await stateDao.updateScore(
@@ -257,7 +259,48 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+
+                  // Optional Row 7: Set-based sports format (Volleyball, Badminton, etc.)
+                  if (widget.scoringModel == ScoringModel.setBased) ...[
+                    DropdownButtonFormField<int>(
+                      value: _maxSets,
+                      decoration: const InputDecoration(
+                        labelText: 'Match Format (Total / Max Sets)',
+                        prefixIcon: Icon(LucideIcons.shield, size: 18),
+                        helperText: 'e.g. Best of 3, 5, or 7 sets for college tournament',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 1,
+                          child: Text('1 Single Set (Sudden Death)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 3,
+                          child: Text('Best of 3 Sets (First to 2 wins)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 5,
+                          child: Text('Best of 5 Sets (First to 3 wins)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 7,
+                          child: Text('Best of 7 Sets (First to 4 wins)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 9,
+                          child: Text('Best of 9 Sets (First to 5 wins)'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => _maxSets = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  const SizedBox(height: 12),
 
                   ElevatedButton(
                     onPressed: _submit,

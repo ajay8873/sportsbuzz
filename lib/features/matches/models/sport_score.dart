@@ -16,14 +16,15 @@ sealed class SportScore {
   Map<String, dynamic> toJson();
 
   /// Default factory constructor for initial blank states based on ScoringModel
-  static SportScore createInitial(ScoringModel model, {String? sportName}) {
+  static SportScore createInitial(ScoringModel model,
+      {String? sportName, int? maxSets}) {
     switch (model) {
       case ScoringModel.runBased:
         return const RunBasedScore();
       case ScoringModel.timeBased:
         return const TimeBasedScore();
       case ScoringModel.setBased:
-        return const SetBasedScore();
+        return SetBasedScore(maxSets: maxSets ?? 3);
       case ScoringModel.boardBased:
         return const BoardBasedScore();
       case ScoringModel.matchBased:

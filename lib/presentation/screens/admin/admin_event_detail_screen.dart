@@ -394,38 +394,39 @@ class _AdminEventDetailScreenState
                                     ),
                                   ],
                                 ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: AppColors.liveRed,
-                                          side: BorderSide(color: AppColors.liveRed.withValues(alpha: 0.4)),
-                                        ),
-                                        icon: const Icon(LucideIcons.trash2, size: 15),
-                                        label: const Text('Delete Sport'),
-                                        onPressed: () => _confirmDeleteSport(selectedSport),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.liveRed,
+                                        side: BorderSide(color: AppColors.liveRed.withValues(alpha: 0.4)),
                                       ),
-                                      const SizedBox(width: 8),
-                                      ElevatedButton.icon(
-                                        icon: const Icon(LucideIcons.plus, size: 16),
-                                        label: const Text('Schedule Match'),
-                                        onPressed: () async {
-                                          final created = await showDialog(
-                                            context: context,
-                                            builder: (_) => CreateMatchDialog(
-                                              sportId: selectedSport.id,
-                                              sportName: selectedSport.name,
-                                              scoringModel: selectedSport.scoringModel,
-                                            ),
-                                          );
-                                          if (created != null) {
-                                            ref.invalidate(matchesForSportProvider(selectedSport.id));
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  ),
+                                      icon: const Icon(LucideIcons.trash2, size: 15),
+                                      label: const Text('Delete Sport'),
+                                      onPressed: () => _confirmDeleteSport(selectedSport),
+                                    ),
+                                    ElevatedButton.icon(
+                                      icon: const Icon(LucideIcons.plus, size: 16),
+                                      label: const Text('Schedule Match'),
+                                      onPressed: () async {
+                                        final created = await showDialog(
+                                          context: context,
+                                          builder: (_) => CreateMatchDialog(
+                                            sportId: selectedSport.id,
+                                            sportName: selectedSport.name,
+                                            scoringModel: selectedSport.scoringModel,
+                                          ),
+                                        );
+                                        if (created != null) {
+                                          ref.invalidate(matchesForSportProvider(selectedSport.id));
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
