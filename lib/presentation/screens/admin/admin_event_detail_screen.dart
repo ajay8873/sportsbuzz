@@ -32,7 +32,7 @@ class AdminEventDetailScreen extends ConsumerStatefulWidget {
 
 class _AdminEventDetailScreenState
     extends ConsumerState<AdminEventDetailScreen> {
-  SportCategory _activeCategory = SportCategory.outdoor;
+  String _activeCategory = 'all'; // 'all', 'outdoor', 'indoor'
   String? _selectedSportId;
 
   void _copyShareLink(String shareSlug) {
@@ -263,24 +263,29 @@ class _AdminEventDetailScreenState
                     ),
                     const SizedBox(height: 20),
 
-                    // Category Switcher (Indoor / Outdoor)
+                    // Category Switcher (All / Outdoor / Indoor)
                     Wrap(
                       spacing: 12,
                       runSpacing: 10,
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        SegmentedButton<SportCategory>(
+                        SegmentedButton<String>(
                           segments: const [
                             ButtonSegment(
-                              value: SportCategory.outdoor,
-                              label: Text('Outdoor Games'),
-                              icon: Icon(LucideIcons.sun, size: 16),
+                              value: 'all',
+                              label: Text('All Sports'),
+                              icon: Icon(LucideIcons.layers, size: 15),
                             ),
                             ButtonSegment(
-                              value: SportCategory.indoor,
-                              label: Text('Indoor Games'),
-                              icon: Icon(LucideIcons.home, size: 16),
+                              value: 'outdoor',
+                              label: Text('Outdoor'),
+                              icon: Icon(LucideIcons.sun, size: 15),
+                            ),
+                            ButtonSegment(
+                              value: 'indoor',
+                              label: Text('Indoor'),
+                              icon: Icon(LucideIcons.home, size: 15),
                             ),
                           ],
                           selected: {_activeCategory},
@@ -294,12 +299,19 @@ class _AdminEventDetailScreenState
                         ElevatedButton.icon(
                           icon: const Icon(LucideIcons.plus, size: 16),
                           label: const Text('Add Sport'),
-                          onPressed: () {
-                            showDialog(
+                          onPressed: () async {
+                            final createdSport = await showDialog(
                               context: context,
                               builder: (_) =>
                                   CreateSportDialog(eventId: widget.eventId),
                             );
+                            if (createdSport != null && mounted) {
+                              setState(() {
+                                _activeCategory = 'all';
+                                _selectedSportId = createdSport.id;
+                              });
+                              ref.invalidate(sportsForEventProvider(widget.eventId));
+                            }
                           },
                         ),
                       ],
@@ -309,9 +321,14 @@ class _AdminEventDetailScreenState
                     // Sports Chips List
                     sportsAsync.when(
                       data: (sports) {
-                        final filteredSports = sports
-                            .where((s) => s.category == _activeCategory)
-                            .toList();
+                        final filteredSports = sports.where((s) {
+                          if (_activeCategory == 'outdoor') {
+                            return s.category == SportCategory.outdoor;
+                          } else if (_activeCategory == 'indoor') {
+                            return s.category == SportCategory.indoor;
+                          }
+                          return true;
+                        }).toList();
 
                         if (filteredSports.isEmpty) {
                           return Container(
@@ -321,19 +338,19 @@ class _AdminEventDetailScreenState
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: AppColors.border),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
-                                'No ${_activeCategory.label} sports added yet. Tap "Add Sport" to add one.',
-                                style: const TextStyle(
+                                'No sports added in this category yet. Tap "Add Sport" to add one.',
+                                style: TextStyle(
                                     color: AppColors.textSecondary),
                               ),
                             ),
                           );
                         }
 
-                        // Auto-select first if none selected
-                        if (_selectedSportId == null &&
-                            filteredSports.isNotEmpty) {
+                        // Auto-select first if none selected or if selected is not in filtered
+                        if (_selectedSportId == null ||
+                            !filteredSports.any((s) => s.id == _selectedSportId)) {
                           _selectedSportId = filteredSports.first.id;
                         }
 
@@ -354,6 +371,12 @@ class _AdminEventDetailScreenState
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: ChoiceChip(
+                                      avatar: Icon(
+                                        sport.category == SportCategory.outdoor
+                                            ? LucideIcons.trophy
+                                            : LucideIcons.crown,
+                                        size: 15,
+                                      ),
                                       label: Text(sport.name),
                                       selected: isSelected,
                                       onSelected: (selected) {
