@@ -12,7 +12,7 @@ String _normalizeStreamUrl(String url) {
   if (trimmed.contains('vdo.ninja')) {
     var ninjaUrl = trimmed;
     if (!ninjaUrl.contains('autoplay')) {
-      ninjaUrl += (ninjaUrl.contains('?') ? '&' : '?') + 'autoplay=1';
+      ninjaUrl += '${ninjaUrl.contains('?') ? '&' : '?'}autoplay=1';
     }
     if (!ninjaUrl.contains('cleanoutput')) {
       ninjaUrl += '&cleanoutput=1';

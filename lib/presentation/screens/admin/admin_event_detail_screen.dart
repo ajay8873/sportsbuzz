@@ -104,7 +104,7 @@ class _AdminEventDetailScreenState
         title: eventAsync.when(
           data: (event) => Text(event?.name ?? 'Event Management'),
           loading: () => const Text('Loading Fest...'),
-          error: (_, __) => const Text('Event Management'),
+          error: (_, _) => const Text('Event Management'),
         ),
         actions: [
           eventAsync.maybeWhen(
@@ -536,7 +536,7 @@ class _SportFixturesList extends ConsumerWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: matches.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final match = matches[index];
             final timeFormat = DateFormat('h:mm a, MMM d');

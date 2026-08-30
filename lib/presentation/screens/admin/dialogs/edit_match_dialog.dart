@@ -39,8 +39,7 @@ class _EditMatchDialogState extends ConsumerState<EditMatchDialog> {
     _venueController = TextEditingController(text: widget.match.venue ?? '');
     _streamUrlController =
         TextEditingController(text: widget.match.streamUrl ?? '');
-    _scheduledTime =
-        widget.match.scheduledTime ?? DateTime.now().add(const Duration(hours: 1));
+    _scheduledTime = widget.match.scheduledTime;
     _status = widget.match.status;
   }
 
@@ -261,7 +260,7 @@ class _EditMatchDialogState extends ConsumerState<EditMatchDialog> {
 
                   // Row 7: Match Status
                   DropdownButtonFormField<MatchStatus>(
-                    value: _status,
+                    initialValue: _status,
                     decoration: const InputDecoration(
                       labelText: 'Match Status',
                       prefixIcon: Icon(LucideIcons.activity, size: 18),

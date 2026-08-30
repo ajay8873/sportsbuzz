@@ -5,10 +5,6 @@ import '../../../../features/sports/models/sport_model.dart';
 import '../../../../features/sports/models/sport_category.dart';
 import '../../../../features/sports/models/scoring_model.dart';
 import '../../../../features/sports/providers/sport_providers.dart';
-import '../../../../features/matches/models/match_model.dart';
-import '../../../../features/matches/models/match_status.dart';
-import '../../../../features/matches/models/sport_score.dart';
-import '../../../../features/matches/providers/match_providers.dart';
 import 'package:uuid/uuid.dart';
 
 class SportPreset {
@@ -222,7 +218,7 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<SportPreset>(
-                    value: _selectedPreset,
+                    initialValue: _selectedPreset,
                     isExpanded: true,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(LucideIcons.trophy, size: 18),

@@ -4,14 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../features/events/models/event_model.dart';
 import '../../../../features/events/providers/event_providers.dart';
-import '../../../../features/sports/models/sport_model.dart';
-import '../../../../features/sports/models/sport_category.dart';
-import '../../../../features/sports/models/scoring_model.dart';
 import '../../../../features/sports/providers/sport_providers.dart';
-import '../../../../features/matches/models/match_model.dart';
-import '../../../../features/matches/models/match_status.dart';
-import '../../../../features/matches/models/sport_score.dart';
-import '../../../../features/matches/providers/match_providers.dart';
 import '../../../../core/utils/share_util.dart';
 import 'package:uuid/uuid.dart';
 
@@ -32,8 +25,8 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
   final _descController = TextEditingController();
   final _pinController = TextEditingController(text: '1234');
 
-  DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 3));
+  final DateTime _startDate = DateTime.now();
+  final DateTime _endDate = DateTime.now().add(const Duration(days: 3));
 
   @override
   void dispose() {

@@ -272,7 +272,7 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
                   // Optional Row 7: Set-based sports format (Volleyball, Badminton, etc.)
                   if (widget.scoringModel == ScoringModel.setBased) ...[
                     DropdownButtonFormField<int>(
-                      value: _maxSets,
+                      initialValue: _maxSets,
                       decoration: const InputDecoration(
                         labelText: 'Match Format (Total / Max Sets)',
                         prefixIcon: Icon(LucideIcons.shield, size: 18),

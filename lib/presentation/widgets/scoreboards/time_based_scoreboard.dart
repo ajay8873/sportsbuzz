@@ -154,7 +154,7 @@ class TimeBasedScoreboard extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: score.timeline.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 6),
+                separatorBuilder: (_, _) => const SizedBox(height: 6),
                 itemBuilder: (context, index) {
                   final evt = score.timeline[index];
                   final minutes = evt.timestampSeconds ~/ 60;

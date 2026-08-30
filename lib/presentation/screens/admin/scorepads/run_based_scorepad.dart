@@ -333,7 +333,7 @@ class RunBasedScorepad extends StatelessWidget {
                           prefixIcon:
                               Icon(LucideIcons.sparkles, size: 16),
                         ),
-                        value: battingSquad.contains(strikerController.text)
+                        initialValue: battingSquad.contains(strikerController.text)
                             ? strikerController.text
                             : null,
                         hint: const Text('Choose opening striker'),
@@ -368,7 +368,7 @@ class RunBasedScorepad extends StatelessWidget {
                           labelText: 'Select Non-Striker from Squad *',
                           prefixIcon: Icon(LucideIcons.user, size: 16),
                         ),
-                        value: battingSquad.contains(nonStrikerController.text)
+                        initialValue: battingSquad.contains(nonStrikerController.text)
                             ? nonStrikerController.text
                             : null,
                         hint: const Text('Choose opening non-striker'),
@@ -412,7 +412,7 @@ class RunBasedScorepad extends StatelessWidget {
                           prefixIcon:
                               Icon(LucideIcons.crosshair, size: 16),
                         ),
-                        value: bowlingSquad.contains(bowlerController.text)
+                        initialValue: bowlingSquad.contains(bowlerController.text)
                             ? bowlerController.text
                             : null,
                         hint: const Text('Choose opening bowler'),
@@ -607,7 +607,7 @@ class RunBasedScorepad extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: activeSquad.contains(selectedFromSquad)
+                      initialValue: activeSquad.contains(selectedFromSquad)
                           ? selectedFromSquad
                           : null,
                       hint: const Text('Pick player from squad'),
@@ -804,7 +804,7 @@ class RunBasedScorepad extends StatelessWidget {
                           color: AppColors.textSecondary)),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
-                    value: reason,
+                    initialValue: reason,
                     items: const [
                       DropdownMenuItem(
                           value: 'retired hurt',
@@ -993,7 +993,7 @@ class RunBasedScorepad extends StatelessWidget {
                         labelText: 'Striker from Squad',
                         prefixIcon: Icon(LucideIcons.sparkles, size: 16),
                       ),
-                      value: nextBattingSquad.contains(strikerCtrl.text)
+                      initialValue: nextBattingSquad.contains(strikerCtrl.text)
                           ? strikerCtrl.text
                           : null,
                       items: nextBattingSquad.map((p) {
@@ -1016,7 +1016,7 @@ class RunBasedScorepad extends StatelessWidget {
                         labelText: 'Non-Striker from Squad',
                         prefixIcon: Icon(LucideIcons.user, size: 16),
                       ),
-                      value: nextBattingSquad.contains(nonStrikerCtrl.text)
+                      initialValue: nextBattingSquad.contains(nonStrikerCtrl.text)
                           ? nonStrikerCtrl.text
                           : null,
                       items: nextBattingSquad.map((p) {
@@ -1046,7 +1046,7 @@ class RunBasedScorepad extends StatelessWidget {
                         labelText: 'Bowler from Squad',
                         prefixIcon: Icon(LucideIcons.crosshair, size: 16),
                       ),
-                      value: nextBowlingSquad.contains(bowlerCtrl.text)
+                      initialValue: nextBowlingSquad.contains(bowlerCtrl.text)
                           ? bowlerCtrl.text
                           : null,
                       items: nextBowlingSquad.map((p) {
@@ -1304,7 +1304,7 @@ class RunBasedScorepad extends StatelessWidget {
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
-                    value: dismissalType,
+                    initialValue: dismissalType,
                     items: const [
                       DropdownMenuItem(value: 'bowled', child: Text('Bowled')),
                       DropdownMenuItem(value: 'caught', child: Text('Caught')),

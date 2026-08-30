@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../models/sport_model.dart';
-import '../models/sport_category.dart';
-import '../models/scoring_model.dart';
 
 class SportDao {
   static final List<SportModel> _mockSports = [];

@@ -58,9 +58,9 @@ class EventModel {
       'start_date': startDate.toIso8601String().split('T').first,
       'end_date': endDate.toIso8601String().split('T').first,
       'share_slug': shareSlug,
-      if (combinedDesc != null) 'description': combinedDesc,
-      if (venue != null) 'venue': venue,
-      if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+      'description': ?combinedDesc,
+      'venue': ?venue,
+      'created_at': ?createdAt?.toIso8601String(),
     };
   }
 
