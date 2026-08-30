@@ -116,7 +116,11 @@ class _TimeBasedScorepadState extends State<TimeBasedScorepad> {
   }
 
   void _addCard(String team, String cardType) {
-    if (team == 'TEAM_A') {
+    final isTeamA = team == 'TEAM_A';
+    final teamName = isTeamA ? widget.teamAName : widget.teamBName;
+    final newTimeline = List<MatchEventLog>.from(widget.score.timeline);
+
+    if (isTeamA) {
       if (cardType == 'YELLOW') {
         final currentYellow = widget.score.teamAYellowCards;
         if (currentYellow >= 1) {
@@ -124,26 +128,65 @@ class _TimeBasedScorepadState extends State<TimeBasedScorepad> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Rule: 2nd Yellow Card for ${widget.teamAName} results in an automatic RED CARD!',
+                'Rule: 2nd Yellow Card for $teamName results in an automatic RED CARD!',
               ),
               backgroundColor: AppColors.liveRed,
               behavior: SnackBarBehavior.floating,
             ),
           );
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'YELLOW_CARD',
+            team: 'TEAM_A',
+            playerName: teamName,
+            notes: '2nd Yellow Card',
+          ));
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}_red',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'RED_CARD',
+            team: 'TEAM_A',
+            playerName: teamName,
+            notes: 'Sent Off (2nd Yellow)',
+          ));
           widget.onScoreChanged(
             widget.score.copyWith(
               teamAYellowCards: currentYellow + 1,
               teamARedCards: widget.score.teamARedCards + 1,
+              timeline: newTimeline,
             ),
           );
         } else {
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'YELLOW_CARD',
+            team: 'TEAM_A',
+            playerName: teamName,
+            notes: 'Yellow Card',
+          ));
           widget.onScoreChanged(
-            widget.score.copyWith(teamAYellowCards: currentYellow + 1),
+            widget.score.copyWith(
+              teamAYellowCards: currentYellow + 1,
+              timeline: newTimeline,
+            ),
           );
         }
       } else {
+        newTimeline.add(MatchEventLog(
+          id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+          timestampSeconds: widget.score.elapsedSeconds,
+          eventType: 'RED_CARD',
+          team: 'TEAM_A',
+          playerName: teamName,
+          notes: 'Straight Red Card',
+        ));
         widget.onScoreChanged(
-          widget.score.copyWith(teamARedCards: widget.score.teamARedCards + 1),
+          widget.score.copyWith(
+            teamARedCards: widget.score.teamARedCards + 1,
+            timeline: newTimeline,
+          ),
         );
       }
     } else {
@@ -154,26 +197,65 @@ class _TimeBasedScorepadState extends State<TimeBasedScorepad> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Rule: 2nd Yellow Card for ${widget.teamBName} results in an automatic RED CARD!',
+                'Rule: 2nd Yellow Card for $teamName results in an automatic RED CARD!',
               ),
               backgroundColor: AppColors.liveRed,
               behavior: SnackBarBehavior.floating,
             ),
           );
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'YELLOW_CARD',
+            team: 'TEAM_B',
+            playerName: teamName,
+            notes: '2nd Yellow Card',
+          ));
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}_red',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'RED_CARD',
+            team: 'TEAM_B',
+            playerName: teamName,
+            notes: 'Sent Off (2nd Yellow)',
+          ));
           widget.onScoreChanged(
             widget.score.copyWith(
               teamBYellowCards: currentYellow + 1,
               teamBRedCards: widget.score.teamBRedCards + 1,
+              timeline: newTimeline,
             ),
           );
         } else {
+          newTimeline.add(MatchEventLog(
+            id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+            timestampSeconds: widget.score.elapsedSeconds,
+            eventType: 'YELLOW_CARD',
+            team: 'TEAM_B',
+            playerName: teamName,
+            notes: 'Yellow Card',
+          ));
           widget.onScoreChanged(
-            widget.score.copyWith(teamBYellowCards: currentYellow + 1),
+            widget.score.copyWith(
+              teamBYellowCards: currentYellow + 1,
+              timeline: newTimeline,
+            ),
           );
         }
       } else {
+        newTimeline.add(MatchEventLog(
+          id: 'evt_${DateTime.now().millisecondsSinceEpoch}',
+          timestampSeconds: widget.score.elapsedSeconds,
+          eventType: 'RED_CARD',
+          team: 'TEAM_B',
+          playerName: teamName,
+          notes: 'Straight Red Card',
+        ));
         widget.onScoreChanged(
-          widget.score.copyWith(teamBRedCards: widget.score.teamBRedCards + 1),
+          widget.score.copyWith(
+            teamBRedCards: widget.score.teamBRedCards + 1,
+            timeline: newTimeline,
+          ),
         );
       }
     }

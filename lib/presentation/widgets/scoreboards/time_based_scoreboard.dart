@@ -17,6 +17,9 @@ class TimeBasedScoreboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final teamABonus = score.teamAFouls >= 5;
+    final teamBBonus = score.teamBFouls >= 5;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -27,7 +30,8 @@ class TimeBasedScoreboard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(6),
@@ -80,6 +84,7 @@ class TimeBasedScoreboard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -90,12 +95,50 @@ class TimeBasedScoreboard extends StatelessWidget {
                           color: AppColors.primary,
                         ),
                       ),
-                      Text(
-                        'Fouls: ${score.teamAFouls}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (score.teamAYellowCards > 0)
+                            _ViewerCardBadge(
+                              count: score.teamAYellowCards,
+                              color: Colors.amber.shade600,
+                              label: 'YC',
+                            ),
+                          if (score.teamARedCards > 0)
+                            _ViewerCardBadge(
+                              count: score.teamARedCards,
+                              color: AppColors.liveRed,
+                              label: 'RC',
+                            ),
+                          Text(
+                            'Fouls: ${score.teamAFouls}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          if (teamABonus)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade800,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'BONUS',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -118,6 +161,7 @@ class TimeBasedScoreboard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -128,12 +172,50 @@ class TimeBasedScoreboard extends StatelessWidget {
                           color: AppColors.primary,
                         ),
                       ),
-                      Text(
-                        'Fouls: ${score.teamBFouls}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (score.teamBYellowCards > 0)
+                            _ViewerCardBadge(
+                              count: score.teamBYellowCards,
+                              color: Colors.amber.shade600,
+                              label: 'YC',
+                            ),
+                          if (score.teamBRedCards > 0)
+                            _ViewerCardBadge(
+                              count: score.teamBRedCards,
+                              color: AppColors.liveRed,
+                              label: 'RC',
+                            ),
+                          Text(
+                            'Fouls: ${score.teamBFouls}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          if (teamBBonus)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade800,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'BONUS',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -158,41 +240,146 @@ class TimeBasedScoreboard extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final evt = score.timeline[index];
                   final minutes = evt.timestampSeconds ~/ 60;
-                  return Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "$minutes'",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                  final isYellow = evt.eventType == 'YELLOW_CARD';
+                  final isRed = evt.eventType == 'RED_CARD';
+                  final isGoal = evt.eventType.contains('GOAL') ||
+                      evt.eventType.contains('POINT');
+
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Text(
+                            "$minutes'",
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(LucideIcons.goal,
-                          size: 14, color: AppColors.primary),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${evt.eventType} - ${evt.playerName ?? (evt.team == "TEAM_A" ? teamA : teamB)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 10),
+                        if (isYellow)
+                          Container(
+                            width: 12,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade600,
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.amber.shade600.withValues(alpha: 0.3),
+                                  blurRadius: 3,
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (isRed)
+                          Container(
+                            width: 12,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: AppColors.liveRed,
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.liveRed.withValues(alpha: 0.3),
+                                  blurRadius: 3,
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (isGoal)
+                          const Icon(LucideIcons.goal,
+                              size: 16, color: AppColors.completedGreen)
+                        else
+                          const Icon(LucideIcons.activity,
+                              size: 15, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            isYellow
+                                ? 'Yellow Card: ${evt.playerName ?? (evt.team == "TEAM_A" ? teamA : teamB)}'
+                                : isRed
+                                    ? 'Red Card: ${evt.playerName ?? (evt.team == "TEAM_A" ? teamA : teamB)}'
+                                    : '${evt.eventType} - ${evt.playerName ?? (evt.team == "TEAM_A" ? teamA : teamB)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isRed
+                                  ? AppColors.liveRed
+                                  : AppColors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 },
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ViewerCardBadge extends StatelessWidget {
+  final int count;
+  final Color color;
+  final String label;
+
+  const _ViewerCardBadge({
+    required this.count,
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 9,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$count',
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
