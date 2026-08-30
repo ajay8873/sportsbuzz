@@ -8,13 +8,19 @@ final Set<String> _registeredViews = {};
 String _normalizeStreamUrl(String url) {
   final trimmed = url.trim();
 
-  // VDO.Ninja (add clean output and autoplay params if not present)
+  // VDO.Ninja (add clean output, autoplay, and scale params)
   if (trimmed.contains('vdo.ninja')) {
-    if (!trimmed.contains('autoplay')) {
-      final separator = trimmed.contains('?') ? '&' : '?';
-      return '$trimmed${separator}autoplay=1&cleanoutput=1';
+    var ninjaUrl = trimmed;
+    if (!ninjaUrl.contains('autoplay')) {
+      ninjaUrl += (ninjaUrl.contains('?') ? '&' : '?') + 'autoplay=1';
     }
-    return trimmed;
+    if (!ninjaUrl.contains('cleanoutput')) {
+      ninjaUrl += '&cleanoutput=1';
+    }
+    if (!ninjaUrl.contains('transparent')) {
+      ninjaUrl += '&transparent=1';
+    }
+    return ninjaUrl;
   }
 
   // YouTube Links: https://www.youtube.com/watch?v=ID or https://youtu.be/ID or https://youtube.com/live/ID
