@@ -69,7 +69,12 @@ class RunBasedScorepad extends StatelessWidget {
               children: [
                 Icon(LucideIcons.coins, color: AppColors.primary, size: 20),
                 SizedBox(width: 8),
-                Text('Match Setup, Toss & Playing 11'),
+                Expanded(
+                  child: Text(
+                    'Match Setup, Toss & Playing 11',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
             content: SizedBox(
@@ -328,6 +333,7 @@ class RunBasedScorepad extends StatelessWidget {
                     // Striker Selector
                     if (battingSquad.isNotEmpty) ...[
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Select Striker from Squad *',
                           prefixIcon:
@@ -336,9 +342,9 @@ class RunBasedScorepad extends StatelessWidget {
                         initialValue: battingSquad.contains(strikerController.text)
                             ? strikerController.text
                             : null,
-                        hint: const Text('Choose opening striker'),
+                        hint: const Text('Choose opening striker', overflow: TextOverflow.ellipsis),
                         items: battingSquad.map((p) {
-                          return DropdownMenuItem(value: p, child: Text(p));
+                          return DropdownMenuItem(value: p, child: Text(p, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -364,6 +370,7 @@ class RunBasedScorepad extends StatelessWidget {
                     // Non-Striker Selector
                     if (battingSquad.isNotEmpty) ...[
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Select Non-Striker from Squad *',
                           prefixIcon: Icon(LucideIcons.user, size: 16),
@@ -371,9 +378,9 @@ class RunBasedScorepad extends StatelessWidget {
                         initialValue: battingSquad.contains(nonStrikerController.text)
                             ? nonStrikerController.text
                             : null,
-                        hint: const Text('Choose opening non-striker'),
+                        hint: const Text('Choose opening non-striker', overflow: TextOverflow.ellipsis),
                         items: battingSquad.map((p) {
-                          return DropdownMenuItem(value: p, child: Text(p));
+                          return DropdownMenuItem(value: p, child: Text(p, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -407,6 +414,7 @@ class RunBasedScorepad extends StatelessWidget {
                     const SizedBox(height: 8),
                     if (bowlingSquad.isNotEmpty) ...[
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Select Bowler from Squad *',
                           prefixIcon:
@@ -415,9 +423,9 @@ class RunBasedScorepad extends StatelessWidget {
                         initialValue: bowlingSquad.contains(bowlerController.text)
                             ? bowlerController.text
                             : null,
-                        hint: const Text('Choose opening bowler'),
+                        hint: const Text('Choose opening bowler', overflow: TextOverflow.ellipsis),
                         items: bowlingSquad.map((p) {
-                          return DropdownMenuItem(value: p, child: Text(p));
+                          return DropdownMenuItem(value: p, child: Text(p, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -572,7 +580,12 @@ class RunBasedScorepad extends StatelessWidget {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text('$role: $currentName'),
+                Expanded(
+                  child: Text(
+                    '$role: $currentName',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
             content: SingleChildScrollView(
@@ -607,12 +620,13 @@ class RunBasedScorepad extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: activeSquad.contains(selectedFromSquad)
                           ? selectedFromSquad
                           : null,
-                      hint: const Text('Pick player from squad'),
+                      hint: const Text('Pick player from squad', overflow: TextOverflow.ellipsis),
                       items: activeSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
+                        return DropdownMenuItem(value: p, child: Text(p, overflow: TextOverflow.ellipsis));
                       }).toList(),
                       onChanged: (val) {
                         if (val != null) {
@@ -747,7 +761,12 @@ class RunBasedScorepad extends StatelessWidget {
               children: [
                 Icon(LucideIcons.ambulance, color: Colors.orange, size: 20),
                 SizedBox(width: 8),
-                Text('Retired Hurt / Batter Substitute'),
+                Expanded(
+                  child: Text(
+                    'Retired Hurt / Batter Substitute',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
             content: SingleChildScrollView(
@@ -804,17 +823,21 @@ class RunBasedScorepad extends StatelessWidget {
                           color: AppColors.textSecondary)),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: reason,
                     items: const [
                       DropdownMenuItem(
                           value: 'retired hurt',
-                          child: Text('Retired Hurt (Injured - Can Bat Later)')),
+                          child: Text('Retired Hurt (Injured - Can Bat Later)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
                           value: 'retired out',
-                          child: Text('Retired Out (Treated as Wicket)')),
+                          child: Text('Retired Out (Treated as Wicket)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
                           value: 'substitute',
-                          child: Text('Substitute / Runner')),
+                          child: Text('Substitute / Runner',
+                              overflow: TextOverflow.ellipsis)),
                     ],
                     onChanged: (val) {
                       if (val != null) setModalState(() => reason = val);
@@ -829,13 +852,18 @@ class RunBasedScorepad extends StatelessWidget {
                   const SizedBox(height: 6),
                   if (availableSquad.isNotEmpty) ...[
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Select from Squad',
                         prefixIcon: Icon(LucideIcons.userPlus, size: 16),
                       ),
-                      hint: const Text('Pick next batter from Playing 11'),
+                      hint: const Text('Pick next batter from Playing 11',
+                          overflow: TextOverflow.ellipsis),
                       items: availableSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
+                        return DropdownMenuItem(
+                            value: p,
+                            child:
+                                Text(p, overflow: TextOverflow.ellipsis));
                       }).toList(),
                       onChanged: (val) {
                         if (val != null) {
@@ -964,105 +992,137 @@ class RunBasedScorepad extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           return AlertDialog(
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('Switch to 2nd Innings'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '1st Innings: ${score.runs}/${score.wickets} (${score.overs} ov)',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+            title: const Row(
+              children: [
+                Icon(LucideIcons.arrowRightLeft,
+                    color: AppColors.primary, size: 20),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Switch to 2nd Innings',
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Target for $nextBatting: $targetRuns runs',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, color: AppColors.primary),
-                  ),
-                  const Divider(height: 20),
-                  Text('2nd Innings Opening Batters ($nextBatting):',
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '1st Innings: ${score.runs}/${score.wickets} (${score.overs} ov)',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Target for $nextBatting: $targetRuns runs',
                       style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 12)),
-                  const SizedBox(height: 6),
-                  if (nextBattingSquad.isNotEmpty) ...[
-                    DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Striker from Squad',
-                        prefixIcon: Icon(LucideIcons.sparkles, size: 16),
-                      ),
-                      initialValue: nextBattingSquad.contains(strikerCtrl.text)
-                          ? strikerCtrl.text
-                          : null,
-                      items: nextBattingSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) setModalState(() => strikerCtrl.text = val);
-                      },
+                          fontWeight: FontWeight.w800, color: AppColors.primary),
                     ),
+                    const Divider(height: 20),
+                    Text('2nd Innings Opening Batters ($nextBatting):',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 12)),
                     const SizedBox(height: 6),
-                  ],
-                  TextField(
-                    controller: strikerCtrl,
-                    decoration: const InputDecoration(labelText: 'Striker Name'),
-                  ),
-                  const SizedBox(height: 10),
-                  if (nextBattingSquad.isNotEmpty) ...[
-                    DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Non-Striker from Squad',
-                        prefixIcon: Icon(LucideIcons.user, size: 16),
+                    if (nextBattingSquad.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Striker from Squad',
+                          prefixIcon: Icon(LucideIcons.sparkles, size: 16),
+                        ),
+                        initialValue: nextBattingSquad.contains(strikerCtrl.text)
+                            ? strikerCtrl.text
+                            : null,
+                        hint: const Text('Pick striker from squad',
+                            overflow: TextOverflow.ellipsis),
+                        items: nextBattingSquad.map((p) {
+                          return DropdownMenuItem(
+                              value: p,
+                              child: Text(p, overflow: TextOverflow.ellipsis));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) setModalState(() => strikerCtrl.text = val);
+                        },
                       ),
-                      initialValue: nextBattingSquad.contains(nonStrikerCtrl.text)
-                          ? nonStrikerCtrl.text
-                          : null,
-                      items: nextBattingSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setModalState(() => nonStrikerCtrl.text = val);
-                        }
-                      },
+                      const SizedBox(height: 6),
+                    ],
+                    TextField(
+                      controller: strikerCtrl,
+                      decoration: const InputDecoration(labelText: 'Striker Name'),
                     ),
-                    const SizedBox(height: 6),
-                  ],
-                  TextField(
-                    controller: nonStrikerCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Non-Striker Name'),
-                  ),
-                  const SizedBox(height: 14),
-                  Text('Opening Bowler ($nextBowling):',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 12)),
-                  const SizedBox(height: 6),
-                  if (nextBowlingSquad.isNotEmpty) ...[
-                    DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Bowler from Squad',
-                        prefixIcon: Icon(LucideIcons.crosshair, size: 16),
+                    const SizedBox(height: 10),
+                    if (nextBattingSquad.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Non-Striker from Squad',
+                          prefixIcon: Icon(LucideIcons.user, size: 16),
+                        ),
+                        initialValue: nextBattingSquad.contains(nonStrikerCtrl.text)
+                            ? nonStrikerCtrl.text
+                            : null,
+                        hint: const Text('Pick non-striker from squad',
+                            overflow: TextOverflow.ellipsis),
+                        items: nextBattingSquad.map((p) {
+                          return DropdownMenuItem(
+                              value: p,
+                              child: Text(p, overflow: TextOverflow.ellipsis));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setModalState(() => nonStrikerCtrl.text = val);
+                          }
+                        },
                       ),
-                      initialValue: nextBowlingSquad.contains(bowlerCtrl.text)
-                          ? bowlerCtrl.text
-                          : null,
-                      items: nextBowlingSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) setModalState(() => bowlerCtrl.text = val);
-                      },
+                      const SizedBox(height: 6),
+                    ],
+                    TextField(
+                      controller: nonStrikerCtrl,
+                      decoration:
+                          const InputDecoration(labelText: 'Non-Striker Name'),
                     ),
+                    const SizedBox(height: 14),
+                    Text('Opening Bowler ($nextBowling):',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 12)),
                     const SizedBox(height: 6),
+                    if (nextBowlingSquad.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Bowler from Squad',
+                          prefixIcon: Icon(LucideIcons.crosshair, size: 16),
+                        ),
+                        initialValue: nextBowlingSquad.contains(bowlerCtrl.text)
+                            ? bowlerCtrl.text
+                            : null,
+                        hint: const Text('Pick bowler from squad',
+                            overflow: TextOverflow.ellipsis),
+                        items: nextBowlingSquad.map((p) {
+                          return DropdownMenuItem(
+                              value: p,
+                              child: Text(p, overflow: TextOverflow.ellipsis));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) setModalState(() => bowlerCtrl.text = val);
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    TextField(
+                      controller: bowlerCtrl,
+                      decoration: const InputDecoration(labelText: 'Bowler Name'),
+                    ),
                   ],
-                  TextField(
-                    controller: bowlerCtrl,
-                    decoration: const InputDecoration(labelText: 'Bowler Name'),
-                  ),
-                ],
+                ),
               ),
             ),
             actions: [
@@ -1085,9 +1145,9 @@ class RunBasedScorepad extends StatelessWidget {
                   onScoreChanged(
                     score.copyWith(
                       innings: '2nd Innings',
-                      target: targetRuns,
                       battingTeam: nextBatting,
                       bowlingTeam: nextBowling,
+                      target: targetRuns,
                       runs: 0,
                       wickets: 0,
                       overs: 0.0,
@@ -1202,25 +1262,30 @@ class RunBasedScorepad extends StatelessWidget {
       ));
     }
 
-    onScoreChanged(
-      score.copyWith(
-        runs: score.runs + runsCount,
-        striker: newStriker,
-        strikerRuns: newStrikerRuns,
-        strikerBalls: newStrikerBalls,
-        nonStriker: newNonStriker,
-        nonStrikerRuns: newNonStrikerRuns,
-        nonStrikerBalls: newNonStrikerBalls,
-        bowlerRunsConceded: score.bowlerRunsConceded + runsCount,
-        bowlerOvers: nextOvers,
-        overs: nextOvers,
-        balls: nextBalls,
-        recentBalls: newRecent,
-        isFreeHit: false,
-        battingScorecard: batting,
-        bowlingScorecard: bowling,
-      ),
+    final updatedScore = score.copyWith(
+      runs: score.runs + runsCount,
+      striker: newStriker,
+      strikerRuns: newStrikerRuns,
+      strikerBalls: newStrikerBalls,
+      nonStriker: newNonStriker,
+      nonStrikerRuns: newNonStrikerRuns,
+      nonStrikerBalls: newNonStrikerBalls,
+      bowlerRunsConceded: score.bowlerRunsConceded + runsCount,
+      bowlerOvers: nextOvers,
+      overs: nextOvers,
+      balls: nextBalls,
+      recentBalls: newRecent,
+      isFreeHit: false,
+      battingScorecard: batting,
+      bowlingScorecard: bowling,
     );
+
+    onScoreChanged(updatedScore);
+
+    if (swapForOverEnd) {
+      _promptNextBowler(context,
+          updatedScore: updatedScore, previousBowler: score.currentBowler);
+    }
   }
 
   void _addWicket(BuildContext context) {
@@ -1232,7 +1297,12 @@ class RunBasedScorepad extends StatelessWidget {
             children: [
               Icon(LucideIcons.alertTriangle, color: Colors.amber),
               SizedBox(width: 8),
-              Text('Free Hit Active'),
+              Expanded(
+                child: Text(
+                  'Free Hit Active',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
           content: const Text(
@@ -1281,76 +1351,108 @@ class RunBasedScorepad extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           return AlertDialog(
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
               children: [
                 Icon(LucideIcons.skull, color: AppColors.liveRed, size: 20),
                 SizedBox(width: 8),
-                Text('Wicket / Dismissal'),
+                Expanded(
+                  child: Text(
+                    'Wicket / Dismissal',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Dismissed Batter: ${score.striker} (${score.strikerRuns} runs, ${score.strikerBalls} balls)',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text('Dismissal Type:',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(
-                    initialValue: dismissalType,
-                    items: const [
-                      DropdownMenuItem(value: 'bowled', child: Text('Bowled')),
-                      DropdownMenuItem(value: 'caught', child: Text('Caught')),
-                      DropdownMenuItem(value: 'lbw', child: Text('LBW')),
-                      DropdownMenuItem(value: 'run out', child: Text('Run Out')),
-                      DropdownMenuItem(value: 'stumped', child: Text('Stumped')),
-                      DropdownMenuItem(
-                          value: 'hit wicket', child: Text('Hit Wicket')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setModalState(() => dismissalType = val);
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  const Text('Next Incoming Batter:',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  if (availableSquad.isNotEmpty) ...[
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dismissed Batter: ${score.striker} (${score.strikerRuns} runs, ${score.strikerBalls} balls)',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Dismissal Type:',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Select from Squad',
-                        prefixIcon: Icon(LucideIcons.userPlus, size: 16),
-                      ),
-                      hint: const Text('Pick next batter from Playing 11'),
-                      items: availableSquad.map((p) {
-                        return DropdownMenuItem(value: p, child: Text(p));
-                      }).toList(),
+                      isExpanded: true,
+                      initialValue: dismissalType,
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'bowled',
+                            child: Text('Bowled',
+                                overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(
+                            value: 'caught',
+                            child: Text('Caught',
+                                overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(
+                            value: 'lbw',
+                            child: Text('LBW',
+                                overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(
+                            value: 'run out',
+                            child: Text('Run Out',
+                                overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(
+                            value: 'stumped',
+                            child: Text('Stumped',
+                                overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(
+                            value: 'hit wicket',
+                            child: Text('Hit Wicket',
+                                overflow: TextOverflow.ellipsis)),
+                      ],
                       onChanged: (val) {
-                        if (val != null) {
-                          setModalState(() => batterCtrl.text = val);
-                        }
+                        if (val != null) setModalState(() => dismissalType = val);
                       },
                     ),
+                    const SizedBox(height: 14),
+                    const Text('Next Incoming Batter:',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 6),
-                  ],
-                  TextField(
-                    controller: batterCtrl,
-                    decoration: InputDecoration(
-                      labelText: availableSquad.isNotEmpty
-                          ? 'Or Type Next Batter Name'
-                          : 'Next Batter Name *',
-                      hintText: 'e.g. Batter ${score.wickets + 3}',
-                      prefixIcon: const Icon(LucideIcons.user, size: 16),
+                    if (availableSquad.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Select from Squad',
+                          prefixIcon: Icon(LucideIcons.userPlus, size: 16),
+                        ),
+                        hint: const Text('Pick next batter from Playing 11',
+                            overflow: TextOverflow.ellipsis),
+                        items: availableSquad.map((p) {
+                          return DropdownMenuItem(
+                              value: p,
+                              child: Text(p, overflow: TextOverflow.ellipsis));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setModalState(() => batterCtrl.text = val);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    TextField(
+                      controller: batterCtrl,
+                      decoration: InputDecoration(
+                        labelText: availableSquad.isNotEmpty
+                            ? 'Or Type Next Batter Name'
+                            : 'Next Batter Name *',
+                        hintText: 'e.g. Batter ${score.wickets + 3}',
+                        prefixIcon: const Icon(LucideIcons.user, size: 16),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             actions: [
@@ -1366,11 +1468,12 @@ class RunBasedScorepad extends StatelessWidget {
                   final newBatterName = batterCtrl.text.trim().isEmpty
                       ? 'Batter ${score.wickets + 3}'
                       : batterCtrl.text.trim();
+                  Navigator.of(ctx).pop();
                   _processWicket(
+                      context,
                       isRunOut: isRunOut,
                       dismissal: dismissalType,
                       newBatterName: newBatterName);
-                  Navigator.of(ctx).pop();
                 },
                 child: const Text('Confirm Wicket'),
               ),
@@ -1381,7 +1484,8 @@ class RunBasedScorepad extends StatelessWidget {
     );
   }
 
-  void _processWicket({
+  void _processWicket(
+    BuildContext context, {
     required bool isRunOut,
     String dismissal = 'bowled',
     String newBatterName = 'Batter',
@@ -1392,10 +1496,12 @@ class RunBasedScorepad extends StatelessWidget {
 
     int nextBalls = score.balls + 1;
     double nextOvers = score.overs;
+    bool swapForOverEnd = false;
 
     if (nextBalls >= 6) {
       nextOvers = (nextOvers.toInt() + 1).toDouble();
       nextBalls = 0;
+      swapForOverEnd = true;
     } else {
       nextOvers = (nextOvers.toInt()) + (nextBalls / 10.0);
     }
@@ -1430,26 +1536,43 @@ class RunBasedScorepad extends StatelessWidget {
       );
     }
 
-    onScoreChanged(
-      score.copyWith(
-        wickets: score.wickets + 1,
-        bowlerWickets:
-            isRunOut ? score.bowlerWickets : (score.bowlerWickets + 1),
-        bowlerOvers: nextOvers,
-        overs: nextOvers,
-        balls: nextBalls,
-        striker: newBatterName,
-        strikerRuns: 0,
-        strikerBalls: 0,
-        recentBalls: newRecent,
-        isFreeHit: false,
-        battingScorecard: batting,
-        bowlingScorecard: bowling,
-      ),
+    // If over ends on wicket ball, rotate strike for next over
+    final activeStriker = swapForOverEnd ? score.nonStriker : newBatterName;
+    final activeStrikerRuns = swapForOverEnd ? score.nonStrikerRuns : 0;
+    final activeStrikerBalls = swapForOverEnd ? score.nonStrikerBalls : 0;
+
+    final activeNonStriker = swapForOverEnd ? newBatterName : score.nonStriker;
+    final activeNonStrikerRuns = swapForOverEnd ? 0 : score.nonStrikerRuns;
+    final activeNonStrikerBalls = swapForOverEnd ? 0 : score.nonStrikerBalls;
+
+    final updatedScore = score.copyWith(
+      wickets: score.wickets + 1,
+      bowlerWickets:
+          isRunOut ? score.bowlerWickets : (score.bowlerWickets + 1),
+      bowlerOvers: nextOvers,
+      overs: nextOvers,
+      balls: nextBalls,
+      striker: activeStriker,
+      strikerRuns: activeStrikerRuns,
+      strikerBalls: activeStrikerBalls,
+      nonStriker: activeNonStriker,
+      nonStrikerRuns: activeNonStrikerRuns,
+      nonStrikerBalls: activeNonStrikerBalls,
+      recentBalls: newRecent,
+      isFreeHit: false,
+      battingScorecard: batting,
+      bowlingScorecard: bowling,
     );
+
+    onScoreChanged(updatedScore);
+
+    if (swapForOverEnd) {
+      _promptNextBowler(context,
+          updatedScore: updatedScore, previousBowler: score.currentBowler);
+    }
   }
 
-  void _addExtra(String extraType) {
+  void _addExtra(BuildContext context, String extraType) {
     final newRecent = List<String>.from(score.recentBalls);
     newRecent.add(extraType);
     if (newRecent.length > 8) newRecent.removeAt(0);
@@ -1461,35 +1584,323 @@ class RunBasedScorepad extends StatelessWidget {
     int legByes = score.legByes;
     bool willBeFreeHit = score.isFreeHit;
 
-    switch (extraType) {
-      case 'WD':
-        wides++;
-        break;
-      case 'NB':
-        noBalls++;
-        willBeFreeHit = true;
-        break;
-      case 'B':
-        byes++;
-        break;
-      case 'LB':
-        legByes++;
-        break;
+    if (extraType == 'WD') {
+      // Wide: illegal ball, does NOT advance ball/over count
+      wides++;
+      onScoreChanged(
+        score.copyWith(
+          runs: score.runs + addRuns,
+          extras: score.extras + addRuns,
+          wides: wides,
+          bowlerRunsConceded: score.bowlerRunsConceded + addRuns,
+          recentBalls: newRecent,
+          isFreeHit: willBeFreeHit,
+        ),
+      );
+      return;
     }
 
-    onScoreChanged(
-      score.copyWith(
-        runs: score.runs + addRuns,
-        extras: score.extras + addRuns,
-        wides: wides,
-        noBalls: noBalls,
-        byes: byes,
-        legByes: legByes,
-        bowlerRunsConceded: (extraType == 'WD' || extraType == 'NB')
-            ? score.bowlerRunsConceded + addRuns
-            : score.bowlerRunsConceded,
-        recentBalls: newRecent,
-        isFreeHit: willBeFreeHit,
+    if (extraType == 'NB') {
+      // No ball: illegal ball, does NOT advance ball/over count, gives Free Hit
+      noBalls++;
+      willBeFreeHit = true;
+      onScoreChanged(
+        score.copyWith(
+          runs: score.runs + addRuns,
+          extras: score.extras + addRuns,
+          noBalls: noBalls,
+          bowlerRunsConceded: score.bowlerRunsConceded + addRuns,
+          recentBalls: newRecent,
+          isFreeHit: willBeFreeHit,
+        ),
+      );
+      return;
+    }
+
+    // Byes (B) and Leg Byes (LB) ARE legal balls in Cricket rules!
+    if (extraType == 'B') byes++;
+    if (extraType == 'LB') legByes++;
+
+    int nextBalls = score.balls + 1;
+    double nextOvers = score.overs;
+    bool swapForOverEnd = false;
+
+    if (nextBalls >= 6) {
+      nextOvers = (nextOvers.toInt() + 1).toDouble();
+      nextBalls = 0;
+      swapForOverEnd = true;
+    } else {
+      nextOvers = (nextOvers.toInt()) + (nextBalls / 10.0);
+    }
+
+    // 1 run scored on bye:
+    // If mid-over: batters swap ends
+    // If over-end: batters swap for the 1 run, then swap ends for the over -> net result: striker stays on strike
+    bool shouldSwap = !swapForOverEnd;
+
+    String newStriker = shouldSwap ? score.nonStriker : score.striker;
+    int newStrikerRuns = shouldSwap ? score.nonStrikerRuns : score.strikerRuns;
+    int newStrikerBalls =
+        shouldSwap ? score.nonStrikerBalls : (score.strikerBalls + 1);
+
+    String newNonStriker = shouldSwap ? score.striker : score.nonStriker;
+    int newNonStrikerRuns =
+        shouldSwap ? score.strikerRuns : score.nonStrikerRuns;
+    int newNonStrikerBalls =
+        shouldSwap ? (score.strikerBalls + 1) : score.nonStrikerBalls;
+
+    // Update bowling scorecard (overs update, but runs NOT credited to bowler)
+    final bowling = List<BowlingEntry>.from(score.bowlingScorecard);
+    final bowlIndex = bowling.indexWhere((b) => b.name == score.currentBowler);
+    if (bowlIndex != -1) {
+      final old = bowling[bowlIndex];
+      bowling[bowlIndex] = old.copyWith(overs: nextOvers);
+    }
+
+    final updatedScore = score.copyWith(
+      runs: score.runs + addRuns,
+      extras: score.extras + addRuns,
+      byes: byes,
+      legByes: legByes,
+      bowlerOvers: nextOvers,
+      overs: nextOvers,
+      balls: nextBalls,
+      striker: newStriker,
+      strikerRuns: newStrikerRuns,
+      strikerBalls: newStrikerBalls,
+      nonStriker: newNonStriker,
+      nonStrikerRuns: newNonStrikerRuns,
+      nonStrikerBalls: newNonStrikerBalls,
+      recentBalls: newRecent,
+      isFreeHit: false,
+      bowlingScorecard: bowling,
+    );
+
+    onScoreChanged(updatedScore);
+
+    if (swapForOverEnd) {
+      _promptNextBowler(context,
+          updatedScore: updatedScore, previousBowler: score.currentBowler);
+    }
+  }
+
+  void _promptNextBowler(
+    BuildContext context, {
+    required RunBasedScore updatedScore,
+    required String previousBowler,
+  }) {
+    final bowlingSquad = updatedScore.bowlingTeam == teamAName
+        ? updatedScore.teamASquad
+        : updatedScore.teamBSquad;
+
+    // Filter available squad bowlers (exclude previous bowler who just finished over)
+    final availableBowlers =
+        bowlingSquad.where((p) => p != previousBowler).toList();
+
+    final nextBowlerController = TextEditingController(
+      text: availableBowlers.isNotEmpty ? availableBowlers.first : '',
+    );
+    String selectedBowler =
+        availableBowlers.isNotEmpty ? availableBowlers.first : '';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final overNum = updatedScore.overs.toInt();
+          return AlertDialog(
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                const Icon(LucideIcons.refreshCw,
+                    color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Over $overNum Complete! Select Next Bowler',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(LucideIcons.user,
+                              size: 16, color: AppColors.textSecondary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Finished Over: $previousBowler',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700, fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Figures: ${updatedScore.bowlerWickets}/${updatedScore.bowlerRunsConceded} (${updatedScore.bowlerOvers.toStringAsFixed(1)} ov)',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'SELECT NEXT BOWLER (${updatedScore.bowlingTeam}):',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    if (bowlingSquad.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Bowler from Squad *',
+                          prefixIcon: Icon(LucideIcons.crosshair, size: 16),
+                        ),
+                        initialValue: availableBowlers.contains(selectedBowler)
+                            ? selectedBowler
+                            : (availableBowlers.isNotEmpty
+                                ? availableBowlers.first
+                                : null),
+                        hint: const Text('Choose bowler from Playing 11',
+                            overflow: TextOverflow.ellipsis),
+                        items: (availableBowlers.isNotEmpty
+                                ? availableBowlers
+                                : bowlingSquad)
+                            .map((p) {
+                          final prevB = updatedScore.bowlingScorecard.firstWhere(
+                            (b) => b.name == p,
+                            orElse: () => BowlingEntry(name: p),
+                          );
+                          final subtext = prevB.overs > 0
+                              ? ' (${prevB.wickets}/${prevB.runs} in ${prevB.overs.toStringAsFixed(1)} ov)'
+                              : '';
+                          return DropdownMenuItem(
+                            value: p,
+                            child: Text(
+                              '$p$subtext',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setModalState(() {
+                              selectedBowler = val;
+                              nextBowlerController.text = val;
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    TextField(
+                      controller: nextBowlerController,
+                      decoration: InputDecoration(
+                        labelText: bowlingSquad.isNotEmpty
+                            ? 'Or Type Next Bowler Name *'
+                            : 'Next Bowler Name *',
+                        hintText: 'e.g. Bumrah / Shami',
+                        prefixIcon: const Icon(LucideIcons.userPlus, size: 16),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySurface.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(LucideIcons.info,
+                              size: 14, color: AppColors.primary),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Strike automatically rotates to non-striker for the new over.',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  final newBowler = nextBowlerController.text.trim().isEmpty
+                      ? (selectedBowler.isNotEmpty ? selectedBowler : 'Bowler')
+                      : nextBowlerController.text.trim();
+
+                  final bowling =
+                      List<BowlingEntry>.from(updatedScore.bowlingScorecard);
+                  final bIndex = bowling.indexWhere((b) => b.name == newBowler);
+
+                  double bowlerOvers = 0.0;
+                  int bowlerRuns = 0;
+                  int bowlerWickets = 0;
+
+                  if (bIndex != -1) {
+                    bowlerOvers = bowling[bIndex].overs;
+                    bowlerRuns = bowling[bIndex].runs;
+                    bowlerWickets = bowling[bIndex].wickets;
+                  } else {
+                    bowling.add(BowlingEntry(name: newBowler));
+                  }
+
+                  onScoreChanged(
+                    updatedScore.copyWith(
+                      currentBowler: newBowler,
+                      bowlerOvers: bowlerOvers,
+                      bowlerRunsConceded: bowlerRuns,
+                      bowlerWickets: bowlerWickets,
+                      bowlingScorecard: bowling,
+                    ),
+                  );
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('Confirm Next Bowler & Start Over'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1923,7 +2334,7 @@ class RunBasedScorepad extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _addExtra('WD'),
+                onPressed: () => _addExtra(context, 'WD'),
                 child: const Text('Wide (+1)'),
               ),
             ),
@@ -1934,7 +2345,7 @@ class RunBasedScorepad extends StatelessWidget {
                   backgroundColor: Colors.orange.shade100,
                   foregroundColor: Colors.orange.shade900,
                 ),
-                onPressed: () => _addExtra('NB'),
+                onPressed: () => _addExtra(context, 'NB'),
                 child: const Text('No Ball (+1)'),
               ),
             ),
@@ -1945,14 +2356,14 @@ class RunBasedScorepad extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _addExtra('B'),
+                onPressed: () => _addExtra(context, 'B'),
                 child: const Text('Byes (+1)'),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _addExtra('LB'),
+                onPressed: () => _addExtra(context, 'LB'),
                 child: const Text('Leg Byes (+1)'),
               ),
             ),
