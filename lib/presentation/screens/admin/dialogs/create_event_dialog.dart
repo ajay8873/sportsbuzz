@@ -75,69 +75,6 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     final dao = ref.read(eventDaoProvider);
     await dao.createEvent(newEvent);
 
-    // Auto-seed Cricket (Outdoor) and Volleyball (Outdoor) with scheduled fixtures
-    final sportDao = ref.read(sportDaoProvider);
-    final matchDao = ref.read(matchDaoProvider);
-    final stateDao = ref.read(matchStateDaoProvider);
-
-    final cricketSport = SportModel(
-      id: uuid.v4(),
-      eventId: newEvent.id,
-      name: 'Cricket',
-      category: SportCategory.outdoor,
-      scoringModel: ScoringModel.runBased,
-      iconName: 'trophy',
-      createdAt: DateTime.now(),
-    );
-    await sportDao.createSport(cricketSport);
-
-    final cricketMatch = MatchModel(
-      id: uuid.v4(),
-      sportId: cricketSport.id,
-      title: 'Dept of CS vs Dept of ME',
-      teamA: 'Dept of CS',
-      teamB: 'Dept of ME',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 1)),
-      venue: 'Main Ground Pitch 1',
-      stage: 'League Match',
-      createdAt: DateTime.now(),
-    );
-    await matchDao.createMatch(cricketMatch);
-    await stateDao.updateScore(
-      matchId: cricketMatch.id,
-      newScore: SportScore.createInitial(ScoringModel.runBased, sportName: 'Cricket'),
-    );
-
-    final volleyballSport = SportModel(
-      id: uuid.v4(),
-      eventId: newEvent.id,
-      name: 'Volleyball',
-      category: SportCategory.outdoor,
-      scoringModel: ScoringModel.setBased,
-      iconName: 'shield',
-      createdAt: DateTime.now(),
-    );
-    await sportDao.createSport(volleyballSport);
-
-    final volleyballMatch = MatchModel(
-      id: uuid.v4(),
-      sportId: volleyballSport.id,
-      title: 'Batch 2023 vs Batch 2024',
-      teamA: 'Batch 2023',
-      teamB: 'Batch 2024',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 3)),
-      venue: 'Volleyball Court A',
-      stage: 'Semi-Final',
-      createdAt: DateTime.now(),
-    );
-    await matchDao.createMatch(volleyballMatch);
-    await stateDao.updateScore(
-      matchId: volleyballMatch.id,
-      newScore: SportScore.createInitial(ScoringModel.setBased, sportName: 'Volleyball'),
-    );
-
     ref.invalidate(allEventsProvider);
     ref.invalidate(sportsForEventProvider(newEvent.id));
 

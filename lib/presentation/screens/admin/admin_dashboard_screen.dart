@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../features/events/models/event_model.dart';
 import '../../../features/events/providers/event_providers.dart';
 import '../../common/empty_state_view.dart';
 import '../../../core/utils/share_util.dart';
@@ -219,6 +220,16 @@ class AdminDashboardScreen extends ConsumerWidget {
                                               onPressed: () => context.push(
                                                   '/admin/events/${event.id}'),
                                             ),
+                                            const SizedBox(width: 6),
+                                            IconButton.outlined(
+                                              icon: const Icon(
+                                                  LucideIcons.trash2,
+                                                  color: Colors.redAccent,
+                                                  size: 16),
+                                              tooltip: 'Delete Fest',
+                                              onPressed: () => _confirmDeleteFest(
+                                                  context, ref, event),
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -283,6 +294,46 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _confirmDeleteFest(
+    BuildContext context,
+    WidgetRef ref,
+    EventModel event,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Fest?'),
+        content: Text(
+          'Are you sure you want to delete "${event.name}"? All associated sports and fixtures will also be removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final dao = ref.read(eventDaoProvider);
+              await dao.deleteEvent(event.id);
+              ref.invalidate(allEventsProvider);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Deleted "${event.name}"')),
+                );
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

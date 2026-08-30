@@ -2,27 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../core/services/high_scale_realtime_manager.dart';
-import '../../events/data/event_dao.dart';
 import '../models/match_state_model.dart';
 import '../models/match_status.dart';
 import '../models/sport_score.dart';
-import '../../../features/sports/models/scoring_model.dart';
 
 class MatchStateDao {
-  static final Map<String, MatchStateModel> _mockMatchStates = {
-    EventDao.defaultCricketMatchId: MatchStateModel(
-      id: const Uuid().v4(),
-      matchId: EventDao.defaultCricketMatchId,
-      currentScore: SportScore.createInitial(ScoringModel.runBased, sportName: 'Cricket'),
-      updatedAt: DateTime.now(),
-    ),
-    EventDao.defaultVolleyballMatchId: MatchStateModel(
-      id: const Uuid().v4(),
-      matchId: EventDao.defaultVolleyballMatchId,
-      currentScore: SportScore.createInitial(ScoringModel.setBased, sportName: 'Volleyball'),
-      updatedAt: DateTime.now(),
-    ),
-  };
+  static final Map<String, MatchStateModel> _mockMatchStates = {};
 
   final HighScaleRealtimeManager _scalingManager = HighScaleRealtimeManager();
 

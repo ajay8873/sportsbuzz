@@ -1,31 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/supabase/supabase_config.dart';
-import '../../events/data/event_dao.dart';
 import '../models/sport_model.dart';
 import '../models/sport_category.dart';
 import '../models/scoring_model.dart';
 
 class SportDao {
-  static final List<SportModel> _mockSports = [
-    SportModel(
-      id: EventDao.defaultCricketId,
-      eventId: EventDao.defaultPlexusId,
-      name: 'Cricket',
-      category: SportCategory.outdoor,
-      scoringModel: ScoringModel.runBased,
-      iconName: 'trophy',
-      createdAt: DateTime.now(),
-    ),
-    SportModel(
-      id: EventDao.defaultVolleyballId,
-      eventId: EventDao.defaultPlexusId,
-      name: 'Volleyball',
-      category: SportCategory.outdoor,
-      scoringModel: ScoringModel.setBased,
-      iconName: 'shield',
-      createdAt: DateTime.now(),
-    ),
-  ];
+  static final List<SportModel> _mockSports = [];
 
   Future<List<SportModel>> getSportsByEvent(String eventId) async {
     final client = SupabaseConfig.client;
@@ -36,10 +16,9 @@ class SportDao {
             .select()
             .eq('event_id', eventId)
             .order('created_at', ascending: true);
-        final list = (response as List<dynamic>)
+        return (response as List<dynamic>)
             .map((json) => SportModel.fromJson(json as Map<String, dynamic>))
             .toList();
-        if (list.isNotEmpty) return list;
       } catch (e) {
         debugPrint('Supabase getSportsByEvent error: $e');
       }

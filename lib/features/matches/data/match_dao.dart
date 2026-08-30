@@ -1,36 +1,10 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/supabase/supabase_config.dart';
-import '../../events/data/event_dao.dart';
 import '../models/match_model.dart';
 import '../models/match_status.dart';
 
 class MatchDao {
-  static final List<MatchModel> _mockMatches = [
-    MatchModel(
-      id: EventDao.defaultCricketMatchId,
-      sportId: EventDao.defaultCricketId,
-      title: 'Dept of CS vs Dept of ME',
-      teamA: 'Dept of CS',
-      teamB: 'Dept of ME',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 1)),
-      venue: 'Main Ground Pitch 1',
-      stage: 'League Match',
-      createdAt: DateTime.now(),
-    ),
-    MatchModel(
-      id: EventDao.defaultVolleyballMatchId,
-      sportId: EventDao.defaultVolleyballId,
-      title: 'Batch 2023 vs Batch 2024',
-      teamA: 'Batch 2023',
-      teamB: 'Batch 2024',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 3)),
-      venue: 'Volleyball Court A',
-      stage: 'Semi-Final',
-      createdAt: DateTime.now(),
-    ),
-  ];
+  static final List<MatchModel> _mockMatches = [];
 
   Future<List<MatchModel>> getMatchesBySport(String sportId) async {
     final client = SupabaseConfig.client;
@@ -41,10 +15,9 @@ class MatchDao {
             .select()
             .eq('sport_id', sportId)
             .order('scheduled_time', ascending: true);
-        final list = (response as List<dynamic>)
+        return (response as List<dynamic>)
             .map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
             .toList();
-        if (list.isNotEmpty) return list;
       } catch (e) {
         debugPrint('Supabase getMatchesBySport error: $e');
       }
