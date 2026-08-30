@@ -17,10 +17,23 @@ sealed class SportScore {
 
   /// Default factory constructor for initial blank states based on ScoringModel
   static SportScore createInitial(ScoringModel model,
-      {String? sportName, int? maxSets}) {
+      {String? sportName, int? maxSets, String? teamA, String? teamB}) {
     switch (model) {
       case ScoringModel.runBased:
-        return const RunBasedScore();
+        return RunBasedScore(
+          battingTeam: teamA ?? 'Team A',
+          bowlingTeam: teamB ?? 'Team B',
+          striker: 'Striker 1',
+          nonStriker: 'Striker 2',
+          currentBowler: 'Bowler 1',
+          battingScorecard: [
+            const BattingEntry(name: 'Striker 1', dismissal: 'not out'),
+            const BattingEntry(name: 'Striker 2', dismissal: 'not out'),
+          ],
+          bowlingScorecard: [
+            const BowlingEntry(name: 'Bowler 1'),
+          ],
+        );
       case ScoringModel.timeBased:
         return const TimeBasedScore();
       case ScoringModel.setBased:

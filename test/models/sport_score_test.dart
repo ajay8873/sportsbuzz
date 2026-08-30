@@ -149,6 +149,46 @@ void main() {
 
       final matchInitial = SportScore.createInitial(ScoringModel.matchBased);
       expect(matchInitial, isA<MatchBasedScore>());
+
+      final customRunInitial = SportScore.createInitial(
+        ScoringModel.runBased,
+        teamA: 'Batch 22',
+        teamB: 'Batch 23',
+      ) as RunBasedScore;
+      expect(customRunInitial.battingTeam, 'Batch 22');
+      expect(customRunInitial.bowlingTeam, 'Batch 23');
+    });
+
+    test('RunBasedScore toss and scorecard serialization', () {
+      const score = RunBasedScore(
+        runs: 85,
+        wickets: 2,
+        overs: 9.4,
+        balls: 4,
+        tossWinner: 'Batch 22',
+        tossDecision: 'BAT',
+        tossSummary: 'Batch 22 won toss & opted to Bat first',
+        battingScorecard: [
+          BattingEntry(name: 'Rohit', runs: 45, balls: 24, fours: 5, sixes: 2, isOut: true, dismissal: 'caught'),
+          BattingEntry(name: 'Virat', runs: 30, balls: 20, fours: 3, sixes: 1, isOut: false, dismissal: 'not out'),
+        ],
+        bowlingScorecard: [
+          BowlingEntry(name: 'Bumrah', overs: 3.0, maidens: 0, runs: 18, wickets: 1),
+        ],
+      );
+
+      final json = score.toJson();
+      expect(json['tossWinner'], 'Batch 22');
+      expect(json['tossDecision'], 'BAT');
+      expect(json['tossSummary'], 'Batch 22 won toss & opted to Bat first');
+
+      final deserialized = SportScore.fromJson(json) as RunBasedScore;
+      expect(deserialized.tossWinner, 'Batch 22');
+      expect(deserialized.battingScorecard.length, 2);
+      expect(deserialized.battingScorecard.first.name, 'Rohit');
+      expect(deserialized.battingScorecard.first.isOut, isTrue);
+      expect(deserialized.bowlingScorecard.length, 1);
+      expect(deserialized.bowlingScorecard.first.name, 'Bumrah');
     });
   });
 }

@@ -1,5 +1,119 @@
 part of 'sport_score.dart';
 
+/// Represents an individual batsman's figures in a cricket match
+class BattingEntry {
+  final String name;
+  final int runs;
+  final int balls;
+  final int fours;
+  final int sixes;
+  final bool isOut;
+  final String dismissal;
+
+  const BattingEntry({
+    required this.name,
+    this.runs = 0,
+    this.balls = 0,
+    this.fours = 0,
+    this.sixes = 0,
+    this.isOut = false,
+    this.dismissal = 'not out',
+  });
+
+  double get strikeRate => balls > 0 ? (runs / balls) * 100 : 0.0;
+
+  BattingEntry copyWith({
+    String? name,
+    int? runs,
+    int? balls,
+    int? fours,
+    int? sixes,
+    bool? isOut,
+    String? dismissal,
+  }) {
+    return BattingEntry(
+      name: name ?? this.name,
+      runs: runs ?? this.runs,
+      balls: balls ?? this.balls,
+      fours: fours ?? this.fours,
+      sixes: sixes ?? this.sixes,
+      isOut: isOut ?? this.isOut,
+      dismissal: dismissal ?? this.dismissal,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'runs': runs,
+        'balls': balls,
+        'fours': fours,
+        'sixes': sixes,
+        'isOut': isOut,
+        'dismissal': dismissal,
+      };
+
+  factory BattingEntry.fromJson(Map<String, dynamic> json) => BattingEntry(
+        name: json['name'] as String? ?? 'Player',
+        runs: (json['runs'] as num?)?.toInt() ?? 0,
+        balls: (json['balls'] as num?)?.toInt() ?? 0,
+        fours: (json['fours'] as num?)?.toInt() ?? 0,
+        sixes: (json['sixes'] as num?)?.toInt() ?? 0,
+        isOut: json['isOut'] as bool? ?? false,
+        dismissal: json['dismissal'] as String? ?? 'not out',
+      );
+}
+
+/// Represents an individual bowler's figures in a cricket match
+class BowlingEntry {
+  final String name;
+  final double overs;
+  final int maidens;
+  final int runs;
+  final int wickets;
+
+  const BowlingEntry({
+    required this.name,
+    this.overs = 0.0,
+    this.maidens = 0,
+    this.runs = 0,
+    this.wickets = 0,
+  });
+
+  double get economy => overs > 0 ? (runs / overs) : 0.0;
+
+  BowlingEntry copyWith({
+    String? name,
+    double? overs,
+    int? maidens,
+    int? runs,
+    int? wickets,
+  }) {
+    return BowlingEntry(
+      name: name ?? this.name,
+      overs: overs ?? this.overs,
+      maidens: maidens ?? this.maidens,
+      runs: runs ?? this.runs,
+      wickets: wickets ?? this.wickets,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'overs': overs,
+        'maidens': maidens,
+        'runs': runs,
+        'wickets': wickets,
+      };
+
+  factory BowlingEntry.fromJson(Map<String, dynamic> json) => BowlingEntry(
+        name: json['name'] as String? ?? 'Bowler',
+        overs: (json['overs'] as num?)?.toDouble() ?? 0.0,
+        maidens: (json['maidens'] as num?)?.toInt() ?? 0,
+        runs: (json['runs'] as num?)?.toInt() ?? 0,
+        wickets: (json['wickets'] as num?)?.toInt() ?? 0,
+      );
+}
+
 /// Comprehensive Run-based scoring model designed for Cricket
 class RunBasedScore extends SportScore {
   final int runs;
@@ -27,6 +141,11 @@ class RunBasedScore extends SportScore {
   final String innings;
   final List<String> recentBalls;
   final bool isFreeHit;
+  final String? tossWinner;
+  final String? tossDecision;
+  final String? tossSummary;
+  final List<BattingEntry> battingScorecard;
+  final List<BowlingEntry> bowlingScorecard;
 
   const RunBasedScore({
     this.runs = 0,
@@ -54,6 +173,11 @@ class RunBasedScore extends SportScore {
     this.innings = '1st Innings',
     this.recentBalls = const [],
     this.isFreeHit = false,
+    this.tossWinner,
+    this.tossDecision,
+    this.tossSummary,
+    this.battingScorecard = const [],
+    this.bowlingScorecard = const [],
   });
 
   @override
@@ -89,6 +213,11 @@ class RunBasedScore extends SportScore {
     String? innings,
     List<String>? recentBalls,
     bool? isFreeHit,
+    String? tossWinner,
+    String? tossDecision,
+    String? tossSummary,
+    List<BattingEntry>? battingScorecard,
+    List<BowlingEntry>? bowlingScorecard,
   }) {
     return RunBasedScore(
       runs: runs ?? this.runs,
@@ -116,6 +245,11 @@ class RunBasedScore extends SportScore {
       innings: innings ?? this.innings,
       recentBalls: recentBalls ?? this.recentBalls,
       isFreeHit: isFreeHit ?? this.isFreeHit,
+      tossWinner: tossWinner ?? this.tossWinner,
+      tossDecision: tossDecision ?? this.tossDecision,
+      tossSummary: tossSummary ?? this.tossSummary,
+      battingScorecard: battingScorecard ?? this.battingScorecard,
+      bowlingScorecard: bowlingScorecard ?? this.bowlingScorecard,
     );
   }
 
@@ -148,6 +282,11 @@ class RunBasedScore extends SportScore {
       'innings': innings,
       'recentBalls': recentBalls,
       'isFreeHit': isFreeHit,
+      'tossWinner': tossWinner,
+      'tossDecision': tossDecision,
+      'tossSummary': tossSummary,
+      'battingScorecard': battingScorecard.map((e) => e.toJson()).toList(),
+      'bowlingScorecard': bowlingScorecard.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -181,6 +320,17 @@ class RunBasedScore extends SportScore {
               .toList() ??
           const [],
       isFreeHit: json['isFreeHit'] as bool? ?? false,
+      tossWinner: json['tossWinner'] as String?,
+      tossDecision: json['tossDecision'] as String?,
+      tossSummary: json['tossSummary'] as String?,
+      battingScorecard: (json['battingScorecard'] as List<dynamic>?)
+              ?.map((e) => BattingEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      bowlingScorecard: (json['bowlingScorecard'] as List<dynamic>?)
+              ?.map((e) => BowlingEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }

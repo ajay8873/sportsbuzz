@@ -274,6 +274,8 @@ class _AdminScoringScreenState extends ConsumerState<AdminScoringScreen> {
                     if (currentScore is RunBasedScore)
                       RunBasedScorepad(
                         score: currentScore,
+                        teamAName: match.teamA,
+                        teamBName: match.teamB,
                         onScoreChanged: _pushScoreChange,
                       )
                     else if (currentScore is TimeBasedScore)

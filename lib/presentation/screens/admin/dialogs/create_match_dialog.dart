@@ -108,6 +108,8 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
       widget.scoringModel,
       sportName: widget.sportName,
       maxSets: _maxSets,
+      teamA: teamA,
+      teamB: teamB,
     );
     final stateDao = ref.read(matchStateDaoProvider);
     await stateDao.updateScore(
