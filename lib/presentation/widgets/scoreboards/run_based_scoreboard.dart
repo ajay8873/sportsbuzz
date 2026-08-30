@@ -20,7 +20,7 @@ class RunBasedScoreboard extends StatefulWidget {
 }
 
 class _RunBasedScoreboardState extends State<RunBasedScoreboard> {
-  bool _showFullScorecard = false;
+  bool _showFullScorecard = true;
 
   @override
   Widget build(BuildContext context) {
