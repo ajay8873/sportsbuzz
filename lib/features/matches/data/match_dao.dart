@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/supabase/supabase_config.dart';
+import '../../events/data/event_dao.dart';
 import '../models/match_model.dart';
 import '../models/match_status.dart';
 
 class MatchDao {
   static final List<MatchModel> _mockMatches = [
     MatchModel(
-      id: 'm_cricket_001',
-      sportId: 's_cricket_001',
+      id: EventDao.defaultCricketMatchId,
+      sportId: EventDao.defaultCricketId,
       title: 'Dept of CS vs Dept of ME',
       teamA: 'Dept of CS',
       teamB: 'Dept of ME',
@@ -18,27 +19,15 @@ class MatchDao {
       createdAt: DateTime.now(),
     ),
     MatchModel(
-      id: 'm_volleyball_001',
-      sportId: 's_volleyball_001',
+      id: EventDao.defaultVolleyballMatchId,
+      sportId: EventDao.defaultVolleyballId,
       title: 'Batch 2023 vs Batch 2024',
       teamA: 'Batch 2023',
       teamB: 'Batch 2024',
       status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 2)),
+      scheduledTime: DateTime.now().add(const Duration(hours: 3)),
       venue: 'Volleyball Court A',
       stage: 'Semi-Final',
-      createdAt: DateTime.now(),
-    ),
-    MatchModel(
-      id: 'm_football_001',
-      sportId: 's_football_001',
-      title: 'Dept of Civil vs Dept of EE',
-      teamA: 'Dept of Civil',
-      teamB: 'Dept of EE',
-      status: MatchStatus.scheduled,
-      scheduledTime: DateTime.now().add(const Duration(hours: 4)),
-      venue: 'Football Turf 1',
-      stage: 'Quarter-Final',
       createdAt: DateTime.now(),
     ),
   ];
@@ -52,9 +41,10 @@ class MatchDao {
             .select()
             .eq('sport_id', sportId)
             .order('scheduled_time', ascending: true);
-        return (response as List<dynamic>)
+        final list = (response as List<dynamic>)
             .map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
             .toList();
+        if (list.isNotEmpty) return list;
       } catch (e) {
         debugPrint('Supabase getMatchesBySport error: $e');
       }
@@ -90,11 +80,15 @@ class MatchDao {
             .insert(match.toJson())
             .select()
             .single();
-        return MatchModel.fromJson(response);
+        final created = MatchModel.fromJson(response);
+        _mockMatches.removeWhere((m) => m.id == created.id);
+        _mockMatches.add(created);
+        return created;
       } catch (e) {
         debugPrint('Supabase createMatch error: $e');
       }
     }
+    _mockMatches.removeWhere((m) => m.id == match.id);
     _mockMatches.add(match);
     return match;
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/supabase/supabase_config.dart';
+import '../../events/data/event_dao.dart';
 import '../models/sport_model.dart';
 import '../models/sport_category.dart';
 import '../models/scoring_model.dart';
@@ -7,8 +8,8 @@ import '../models/scoring_model.dart';
 class SportDao {
   static final List<SportModel> _mockSports = [
     SportModel(
-      id: 's_cricket_001',
-      eventId: 'e_plexus_2026',
+      id: EventDao.defaultCricketId,
+      eventId: EventDao.defaultPlexusId,
       name: 'Cricket',
       category: SportCategory.outdoor,
       scoringModel: ScoringModel.runBased,
@@ -16,39 +17,12 @@ class SportDao {
       createdAt: DateTime.now(),
     ),
     SportModel(
-      id: 's_volleyball_001',
-      eventId: 'e_plexus_2026',
+      id: EventDao.defaultVolleyballId,
+      eventId: EventDao.defaultPlexusId,
       name: 'Volleyball',
       category: SportCategory.outdoor,
       scoringModel: ScoringModel.setBased,
       iconName: 'shield',
-      createdAt: DateTime.now(),
-    ),
-    SportModel(
-      id: 's_football_001',
-      eventId: 'e_plexus_2026',
-      name: 'Football',
-      category: SportCategory.outdoor,
-      scoringModel: ScoringModel.timeBased,
-      iconName: 'activity',
-      createdAt: DateTime.now(),
-    ),
-    SportModel(
-      id: 's_badminton_001',
-      eventId: 'e_plexus_2026',
-      name: 'Badminton',
-      category: SportCategory.indoor,
-      scoringModel: ScoringModel.setBased,
-      iconName: 'activity',
-      createdAt: DateTime.now(),
-    ),
-    SportModel(
-      id: 's_chess_001',
-      eventId: 'e_plexus_2026',
-      name: 'Chess',
-      category: SportCategory.indoor,
-      scoringModel: ScoringModel.boardBased,
-      iconName: 'crown',
       createdAt: DateTime.now(),
     ),
   ];
@@ -62,9 +36,10 @@ class SportDao {
             .select()
             .eq('event_id', eventId)
             .order('created_at', ascending: true);
-        return (response as List<dynamic>)
+        final list = (response as List<dynamic>)
             .map((json) => SportModel.fromJson(json as Map<String, dynamic>))
             .toList();
+        if (list.isNotEmpty) return list;
       } catch (e) {
         debugPrint('Supabase getSportsByEvent error: $e');
       }
@@ -100,11 +75,15 @@ class SportDao {
             .insert(sport.toJson())
             .select()
             .single();
-        return SportModel.fromJson(response);
+        final created = SportModel.fromJson(response);
+        _mockSports.removeWhere((s) => s.id == created.id);
+        _mockSports.add(created);
+        return created;
       } catch (e) {
         debugPrint('Supabase createSport error: $e');
       }
     }
+    _mockSports.removeWhere((s) => s.id == sport.id);
     _mockSports.add(sport);
     return sport;
   }

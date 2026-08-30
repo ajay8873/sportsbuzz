@@ -9,6 +9,7 @@ import '../../../../features/matches/models/match_model.dart';
 import '../../../../features/matches/models/match_status.dart';
 import '../../../../features/matches/models/sport_score.dart';
 import '../../../../features/matches/providers/match_providers.dart';
+import 'package:uuid/uuid.dart';
 
 class SportPreset {
   final String name;
@@ -156,8 +157,11 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final uuid = const Uuid();
+    final sportId = uuid.v4();
+
     final newSport = SportModel(
-      id: 's_${DateTime.now().millisecondsSinceEpoch}',
+      id: sportId,
       eventId: widget.eventId,
       name: _nameController.text.trim(),
       category: _category,
@@ -173,7 +177,7 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
     final matchDao = ref.read(matchDaoProvider);
     final stateDao = ref.read(matchStateDaoProvider);
     final newMatch = MatchModel(
-      id: 'm_${DateTime.now().millisecondsSinceEpoch}',
+      id: uuid.v4(),
       sportId: newSport.id,
       title: 'Dept of CS vs Dept of ME',
       teamA: 'Dept of CS',

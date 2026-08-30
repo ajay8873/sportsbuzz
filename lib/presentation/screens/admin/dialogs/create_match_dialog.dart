@@ -7,6 +7,7 @@ import '../../../../features/matches/models/match_status.dart';
 import '../../../../features/matches/models/sport_score.dart';
 import '../../../../features/matches/providers/match_providers.dart';
 import '../../../../features/sports/models/scoring_model.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateMatchDialog extends ConsumerStatefulWidget {
   final String sportId;
@@ -77,7 +78,7 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
     final teamB = _teamBController.text.trim();
 
     final newMatch = MatchModel(
-      id: 'm_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       sportId: widget.sportId,
       title: '$teamA vs $teamB',
       teamA: teamA,

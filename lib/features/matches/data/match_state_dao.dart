@@ -1,30 +1,25 @@
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../core/services/high_scale_realtime_manager.dart';
+import '../../events/data/event_dao.dart';
 import '../models/match_state_model.dart';
 import '../models/match_status.dart';
 import '../models/sport_score.dart';
-
 import '../../../features/sports/models/scoring_model.dart';
 
 class MatchStateDao {
   static final Map<String, MatchStateModel> _mockMatchStates = {
-    'm_cricket_001': MatchStateModel(
-      id: 'state_m_cricket_001',
-      matchId: 'm_cricket_001',
+    EventDao.defaultCricketMatchId: MatchStateModel(
+      id: const Uuid().v4(),
+      matchId: EventDao.defaultCricketMatchId,
       currentScore: SportScore.createInitial(ScoringModel.runBased, sportName: 'Cricket'),
       updatedAt: DateTime.now(),
     ),
-    'm_volleyball_001': MatchStateModel(
-      id: 'state_m_volleyball_001',
-      matchId: 'm_volleyball_001',
+    EventDao.defaultVolleyballMatchId: MatchStateModel(
+      id: const Uuid().v4(),
+      matchId: EventDao.defaultVolleyballMatchId,
       currentScore: SportScore.createInitial(ScoringModel.setBased, sportName: 'Volleyball'),
-      updatedAt: DateTime.now(),
-    ),
-    'm_football_001': MatchStateModel(
-      id: 'state_m_football_001',
-      matchId: 'm_football_001',
-      currentScore: SportScore.createInitial(ScoringModel.timeBased, sportName: 'Football'),
       updatedAt: DateTime.now(),
     ),
   };
@@ -41,7 +36,9 @@ class MatchStateDao {
             .eq('match_id', matchId)
             .maybeSingle();
         if (response != null) {
-          return MatchStateModel.fromJson(response);
+          final model = MatchStateModel.fromJson(response);
+          _mockMatchStates[matchId] = model;
+          return model;
         }
       } catch (e) {
         debugPrint('Supabase getMatchState error: $e');
@@ -54,8 +51,9 @@ class MatchStateDao {
     required String matchId,
     required SportScore newScore,
   }) async {
+    final existing = _mockMatchStates[matchId];
     final stateModel = MatchStateModel(
-      id: 'state_$matchId',
+      id: existing?.id ?? const Uuid().v4(),
       matchId: matchId,
       currentScore: newScore,
       updatedAt: DateTime.now(),

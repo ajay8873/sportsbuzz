@@ -13,6 +13,7 @@ import '../../../../features/matches/models/match_status.dart';
 import '../../../../features/matches/models/sport_score.dart';
 import '../../../../features/matches/providers/match_providers.dart';
 import '../../../../core/utils/share_util.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateEventDialog extends ConsumerStatefulWidget {
   const CreateEventDialog({super.key});
@@ -29,7 +30,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
   final _descController = TextEditingController();
 
   DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 4));
+  DateTime _endDate = DateTime.now().add(const Duration(days: 3));
 
   @override
   void dispose() {
@@ -57,10 +58,13 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final uuid = const Uuid();
+    final eventId = uuid.v4();
+
     final newEvent = EventModel(
-      id: 'e_${DateTime.now().millisecondsSinceEpoch}',
+      id: eventId,
       name: _nameController.text.trim(),
-      shareSlug: _slugController.text.trim(),
+      shareSlug: _slugController.text.trim().toLowerCase(),
       venue: _venueController.text.trim(),
       description: _descController.text.trim(),
       startDate: _startDate,
@@ -77,7 +81,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     final stateDao = ref.read(matchStateDaoProvider);
 
     final cricketSport = SportModel(
-      id: 's_cricket_${newEvent.id}',
+      id: uuid.v4(),
       eventId: newEvent.id,
       name: 'Cricket',
       category: SportCategory.outdoor,
@@ -88,7 +92,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     await sportDao.createSport(cricketSport);
 
     final cricketMatch = MatchModel(
-      id: 'm_cricket_${newEvent.id}',
+      id: uuid.v4(),
       sportId: cricketSport.id,
       title: 'Dept of CS vs Dept of ME',
       teamA: 'Dept of CS',
@@ -106,7 +110,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     );
 
     final volleyballSport = SportModel(
-      id: 's_volleyball_${newEvent.id}',
+      id: uuid.v4(),
       eventId: newEvent.id,
       name: 'Volleyball',
       category: SportCategory.outdoor,
@@ -117,7 +121,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
     await sportDao.createSport(volleyballSport);
 
     final volleyballMatch = MatchModel(
-      id: 'm_volleyball_${newEvent.id}',
+      id: uuid.v4(),
       sportId: volleyballSport.id,
       title: 'Batch 2023 vs Batch 2024',
       teamA: 'Batch 2023',
