@@ -180,7 +180,7 @@ class _LinkCodeResolverCardState extends ConsumerState<LinkCodeResolverCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (event.venue != null && event.venue!.isNotEmpty)
-                          Text('📍 ${event.venue}', style: const TextStyle(fontSize: 12)),
+                          Text('Venue: ${event.venue}', style: const TextStyle(fontSize: 12)),
                         Text(
                           'Dates: ${DateFormat("MMM d").format(event.startDate)} - ${DateFormat("MMM d, yyyy").format(event.endDate)}',
                           style: const TextStyle(fontSize: 11, color: AppColors.textMuted),

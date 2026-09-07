@@ -157,7 +157,7 @@ class StreamGuideDialog extends StatelessWidget {
                           'Use your standard YouTube channel without needing 50 subscribers on mobile.',
                       steps: const [
                         '1. Open studio.youtube.com in your browser (use "Desktop site" on phone).',
-                        '2. Click "Create" ➔ "Go Live" and copy your public YouTube watch link (e.g. https://youtube.com/watch?v=...).',
+                        '2. Click "Create" -> "Go Live" and copy your public YouTube watch link (e.g. https://youtube.com/watch?v=...).',
                         '3. Paste the YouTube link into the Stream URL box in Zest.',
                         '4. Copy the YouTube RTMP Stream Key into Larix Broadcaster or Prism Live on your camera phone and start streaming!',
                       ],

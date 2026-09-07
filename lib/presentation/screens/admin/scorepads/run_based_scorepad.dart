@@ -171,7 +171,7 @@ class RunBasedScorepad extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '🏏 Batting: $battingTeamName   •   🛡️ Bowling: $bowlingTeamName',
+                        'Batting: $battingTeamName   •   Bowling: $bowlingTeamName',
                         style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,

@@ -83,7 +83,7 @@ class _RunBasedScoreboardState extends State<RunBasedScoreboard> {
                         Icon(LucideIcons.flame, color: Colors.white, size: 18),
                         SizedBox(width: 8),
                         Text(
-                          '🔥 FREE HIT NEXT BALL',
+                          'FREE HIT NEXT BALL',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,

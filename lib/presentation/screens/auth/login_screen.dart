@@ -177,19 +177,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // App Brand Header
                   Center(
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      width: 76,
+                      height: 76,
                       decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.2),
-                          width: 2,
-                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.18),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        LucideIcons.trophy,
-                        size: 38,
-                        color: AppColors.primary,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Image.asset(
+                          'assets/icons/app_icon.png',
+                          width: 76,
+                          height: 76,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
