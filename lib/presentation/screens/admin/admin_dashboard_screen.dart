@@ -10,7 +10,9 @@ import '../../../features/events/providers/event_providers.dart';
 import '../../common/empty_state_view.dart';
 import '../../../core/utils/share_util.dart';
 import 'dialogs/create_event_dialog.dart';
-
+import 'dialogs/manage_co_admins_dialog.dart';
+import '../../widgets/auth_user_button.dart';
+import '../../../features/auth/providers/auth_providers.dart';
 import '../../../core/services/admin_auth_service.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -191,6 +193,9 @@ class AdminDashboardScreen extends ConsumerWidget {
             tooltip: 'Refresh Events',
             onPressed: () => ref.invalidate(adminSharedEventsProvider),
           ),
+          const SizedBox(width: 4),
+          const AuthUserButton(),
+          const SizedBox(width: 8),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -356,6 +361,20 @@ class AdminDashboardScreen extends ConsumerWidget {
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
+                                            if (ref.watch(isSuperAdminProvider) ||
+                                                (event.creatorEmail != null &&
+                                                    event.creatorEmail!.trim().toLowerCase() ==
+                                                        ref.watch(currentUserEmailProvider)?.trim().toLowerCase())) ...[
+                                              IconButton.outlined(
+                                                icon: const Icon(LucideIcons.userCheck, size: 16),
+                                                tooltip: 'Manage Co-Admins',
+                                                onPressed: () => showDialog(
+                                                  context: context,
+                                                  builder: (_) => ManageCoAdminsDialog(event: event),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
                                             IconButton.outlined(
                                               icon: const Icon(
                                                   LucideIcons.share2,

@@ -10,6 +10,7 @@ import '../../../../core/utils/share_util.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/services/admin_auth_service.dart';
+import '../../../../core/services/auth_service.dart';
 
 class CreateEventDialog extends ConsumerStatefulWidget {
   const CreateEventDialog({super.key});
@@ -114,6 +115,7 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
       venue: _venueController.text.trim(),
       description: _descController.text.trim(),
       adminPin: _pinController.text.trim().isEmpty ? '1234' : _pinController.text.trim(),
+      creatorEmail: AuthService.currentEmail,
       startDate: _startDate,
       endDate: _endDate,
       createdAt: DateTime.now(),
@@ -121,9 +123,10 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
 
     await dao.createEvent(newEvent);
 
-    // Auto-unlock & mark as shared for event creator on this device
+    // Auto-unlock & mark as shared & recent for event creator on this device
     await ref.read(unlockedEventsProvider.notifier).unlock(newEvent.id);
     await ref.read(sharedTournamentsProvider.notifier).addSharedEvent(newEvent.id);
+    await ref.read(recentTournamentsProvider.notifier).addRecentEvent(newEvent.id);
 
     ref.invalidate(allEventsProvider);
     ref.invalidate(adminSharedEventsProvider);

@@ -7,15 +7,26 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/share_util.dart';
+import '../../core/services/admin_auth_service.dart';
+import '../../features/auth/providers/auth_providers.dart';
 import '../../features/events/models/event_model.dart';
 import '../../features/events/providers/event_providers.dart';
 import '../common/empty_state_view.dart';
+import '../widgets/auth_user_button.dart';
+import '../widgets/hero_live_match_search.dart';
 import '../widgets/link_code_resolver_card.dart';
 import '../widgets/sports_engine_showcase_widget.dart';
 import 'admin/dialogs/create_event_dialog.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String _activeFilter = 'feed'; // 'feed', 'recent', 'saved', 'created', 'all'
 
   void _copyShareLink(BuildContext context, String shareSlug) {
     final link = ShareUtil.getEventShareUrl(shareSlug);
@@ -36,9 +47,20 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  void _openTournament(EventModel event) {
+    // Record as recently viewed
+    ref.read(recentTournamentsProvider.notifier).addRecentEvent(event.id);
+    context.push('/event/${event.shareSlug}');
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final eventsAsync = ref.watch(allEventsProvider);
+    final sharedIds = ref.watch(sharedTournamentsProvider);
+    final recentIds = ref.watch(recentTournamentsProvider);
+    final bookmarkedIds = ref.watch(bookmarkedTournamentsProvider);
+    final currentUserEmail = ref.watch(currentUserEmailProvider);
+    final isSuperAdmin = ref.watch(isSuperAdminProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -82,6 +104,10 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+        actions: const [
+          AuthUserButton(),
+          SizedBox(width: 14),
+        ],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -171,7 +197,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
                         // Action Buttons Row (Coherent sizing and responsive)
                         LayoutBuilder(
@@ -253,6 +279,9 @@ class HomeScreen extends ConsumerWidget {
                             );
                           },
                         ),
+
+                        // Hero Live Match Search with direct live scorecards
+                        const HeroLiveMatchSearch(),
                       ],
                     ),
                   ),
@@ -263,13 +292,13 @@ class HomeScreen extends ConsumerWidget {
                 const LinkCodeResolverCard(),
                 const SizedBox(height: 24),
 
-                // 3. Active Fests & Tournaments
+                // 3. Tournaments Section Header with Filter Chips
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
-                        'ACTIVE & RECENT TOURNAMENTS',
+                        'YOUR TOURNAMENTS & FEED',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.6,
@@ -301,33 +330,145 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
+                // Feed Filter Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip(
+                        label: 'My Feed',
+                        icon: LucideIcons.sparkles,
+                        filterKey: 'feed',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Recently Opened (${recentIds.length})',
+                        icon: LucideIcons.history,
+                        filterKey: 'recent',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Saved (${bookmarkedIds.length})',
+                        icon: LucideIcons.bookmark,
+                        filterKey: 'saved',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Created by Me',
+                        icon: LucideIcons.user,
+                        filterKey: 'created',
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Explore All',
+                        icon: LucideIcons.compass,
+                        filterKey: 'all',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Tournaments List
                 eventsAsync.when(
-                  data: (events) {
-                    if (events.isEmpty) {
+                  data: (allEvents) {
+                    // Filter based on selected tab
+                    List<EventModel> displayEvents = [];
+
+                    if (_activeFilter == 'feed') {
+                      displayEvents = allEvents.where((e) {
+                        if (isSuperAdmin) return true;
+                        if (currentUserEmail != null && currentUserEmail.isNotEmpty) {
+                          if (e.creatorEmail?.trim().toLowerCase() == currentUserEmail.trim().toLowerCase()) return true;
+                          if (e.canUserAdmin(currentUserEmail)) return true;
+                        }
+                        if (sharedIds.contains(e.id)) return true;
+                        if (recentIds.contains(e.id)) return true;
+                        if (bookmarkedIds.contains(e.id)) return true;
+                        return false;
+                      }).toList();
+                    } else if (_activeFilter == 'recent') {
+                      displayEvents = allEvents.where((e) => recentIds.contains(e.id)).toList();
+                      // Sort by recent order
+                      displayEvents.sort((a, b) {
+                        final indexA = recentIds.indexOf(a.id);
+                        final indexB = recentIds.indexOf(b.id);
+                        return indexA.compareTo(indexB);
+                      });
+                    } else if (_activeFilter == 'saved') {
+                      displayEvents = allEvents.where((e) => bookmarkedIds.contains(e.id)).toList();
+                    } else if (_activeFilter == 'created') {
+                      displayEvents = allEvents.where((e) {
+                        if (currentUserEmail == null || currentUserEmail.isEmpty) return false;
+                        return e.creatorEmail?.trim().toLowerCase() == currentUserEmail.trim().toLowerCase();
+                      }).toList();
+                    } else {
+                      displayEvents = allEvents;
+                    }
+
+                    if (displayEvents.isEmpty) {
+                      String emptyTitle = 'No Tournaments Found';
+                      String emptyMsg = 'Host your college sports fest or athletic meet to generate live spectator links.';
+
+                      if (_activeFilter == 'feed') {
+                        emptyTitle = 'Your Feed is Clean';
+                        emptyMsg = 'Tournaments shared with you, created by you, recently viewed, or saved will appear here.';
+                      } else if (_activeFilter == 'recent') {
+                        emptyTitle = 'No Recently Opened Tournaments';
+                        emptyMsg = 'Tournaments you open or resolve via link code will be tracked here for quick access.';
+                      } else if (_activeFilter == 'saved') {
+                        emptyTitle = 'No Saved Tournaments';
+                        emptyMsg = 'Tap the bookmark icon on any tournament to pin it to your saved list.';
+                      } else if (_activeFilter == 'created') {
+                        emptyTitle = 'No Tournaments Created Yet';
+                        emptyMsg = 'Host your first tournament or fest to manage fixtures and teams.';
+                      }
+
                       return EmptyStateView(
-                        icon: LucideIcons.trophy,
-                        title: 'No Active Tournaments Found',
-                        message:
-                            'Host your college sports fest or athletic meet to generate live spectator links.',
-                        action: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                          ),
-                          icon: const Icon(LucideIcons.plus, size: 16),
-                          label: const Text('Host First Tournament'),
-                          onPressed: () async {
-                            final createdEvent =
-                                await showDialog<EventModel>(
-                              context: context,
-                              builder: (_) => const CreateEventDialog(),
-                            );
-                            if (createdEvent != null && context.mounted) {
-                              context.push('/admin/events/${createdEvent.id}');
-                            }
-                          },
+                        icon: _activeFilter == 'saved'
+                            ? LucideIcons.bookmark
+                            : _activeFilter == 'recent'
+                                ? LucideIcons.history
+                                : LucideIcons.trophy,
+                        title: emptyTitle,
+                        message: emptyMsg,
+                        action: Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            if (_activeFilter != 'all')
+                              OutlinedButton.icon(
+                                icon: const Icon(LucideIcons.compass, size: 16),
+                                label: const Text('Explore All Fests'),
+                                onPressed: () {
+                                  setState(() {
+                                    _activeFilter = 'all';
+                                  });
+                                },
+                              ),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                              ),
+                              icon: const Icon(LucideIcons.plus, size: 16),
+                              label: const Text('Host Tournament'),
+                              onPressed: () async {
+                                final createdEvent =
+                                    await showDialog<EventModel>(
+                                  context: context,
+                                  builder: (_) => const CreateEventDialog(),
+                                );
+                                if (createdEvent != null && context.mounted) {
+                                  ref.invalidate(allEventsProvider);
+                                  context.push('/admin/events/${createdEvent.id}');
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       );
                     }
@@ -335,11 +476,16 @@ class HomeScreen extends ConsumerWidget {
                     return ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: events.length,
+                      itemCount: displayEvents.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final event = events[index];
+                        final event = displayEvents[index];
                         final dateFormat = DateFormat('MMM d, yyyy');
+                        final isBookmarked = bookmarkedIds.contains(event.id);
+                        final isRecent = recentIds.contains(event.id);
+                        final isCreator = currentUserEmail != null &&
+                            event.creatorEmail?.trim().toLowerCase() == currentUserEmail.trim().toLowerCase();
+                        final isCoAdmin = !isCreator && event.canUserAdmin(currentUserEmail);
 
                         return Card(
                           elevation: 0,
@@ -349,8 +495,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(14),
-                            onTap: () =>
-                                context.push('/event/${event.shareSlug}'),
+                            onTap: () => _openTournament(event),
                             child: Padding(
                               padding: const EdgeInsets.all(14.0),
                               child: Row(
@@ -371,18 +516,33 @@ class HomeScreen extends ConsumerWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          event.name,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                event.name,
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            if (isCreator) ...[
+                                              const SizedBox(width: 6),
+                                              _badge('CREATOR', AppColors.zestOrange),
+                                            ] else if (isCoAdmin) ...[
+                                              const SizedBox(width: 6),
+                                              _badge('CO-ADMIN', AppColors.primary),
+                                            ] else if (isRecent) ...[
+                                              const SizedBox(width: 6),
+                                              _badge('RECENT', AppColors.textSecondary),
+                                            ],
+                                          ],
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
@@ -406,8 +566,7 @@ class HomeScreen extends ConsumerWidget {
                                             ),
                                           ],
                                         ),
-                                        if (event.venue != null &&
-                                            event.venue!.isNotEmpty) ...[
+                                        if (event.venue != null && event.venue!.isNotEmpty) ...[
                                           const SizedBox(height: 2),
                                           Row(
                                             children: [
@@ -436,6 +595,23 @@ class HomeScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 6),
 
+                                  // Bookmark / Save toggle button
+                                  IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.all(6),
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(
+                                      isBookmarked ? LucideIcons.bookmarkCheck : LucideIcons.bookmark,
+                                      size: 17,
+                                      color: isBookmarked ? AppColors.primary : AppColors.textMuted,
+                                    ),
+                                    tooltip: isBookmarked ? 'Saved to Bookmarks' : 'Save Tournament',
+                                    onPressed: () {
+                                      ref.read(bookmarkedTournamentsProvider.notifier).toggleBookmark(event.id);
+                                    },
+                                  ),
+                                  const SizedBox(width: 4),
+
                                   // Quick Copy Link button
                                   IconButton(
                                     visualDensity: VisualDensity.compact,
@@ -447,8 +623,7 @@ class HomeScreen extends ConsumerWidget {
                                       color: AppColors.textSecondary,
                                     ),
                                     tooltip: 'Copy Spectator Link',
-                                    onPressed: () =>
-                                        _copyShareLink(context, event.shareSlug),
+                                    onPressed: () => _copyShareLink(context, event.shareSlug),
                                   ),
                                   const SizedBox(width: 6),
 
@@ -466,8 +641,7 @@ class HomeScreen extends ConsumerWidget {
                                       minimumSize: Size.zero,
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    icon: const Icon(LucideIcons.arrowRight,
-                                        size: 13),
+                                    icon: const Icon(LucideIcons.arrowRight, size: 13),
                                     label: const Text(
                                       'Enter',
                                       style: TextStyle(
@@ -475,8 +649,7 @@ class HomeScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    onPressed: () =>
-                                        context.push('/event/${event.shareSlug}'),
+                                    onPressed: () => _openTournament(event),
                                   ),
                                 ],
                               ),
@@ -498,7 +671,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // 5. Multi-Sport Scoring Engine Overview
+                // 4. Multi-Sport Scoring Engine Overview
                 const SportsEngineShowcaseWidget(),
                 const SizedBox(height: 32),
 
@@ -527,6 +700,67 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required IconData icon,
+    required String filterKey,
+  }) {
+    final isSelected = _activeFilter == filterKey;
+    return ChoiceChip(
+      showCheckmark: false,
+      avatar: Icon(
+        icon,
+        size: 14,
+        color: isSelected ? Colors.white : AppColors.textSecondary,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+          color: isSelected ? Colors.white : AppColors.textSecondary,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: AppColors.primary,
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : AppColors.border,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      onSelected: (val) {
+        if (val) {
+          setState(() {
+            _activeFilter = filterKey;
+          });
+        }
+      },
+    );
+  }
+
+  Widget _badge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          color: color,
+          letterSpacing: 0.4,
         ),
       ),
     );

@@ -19,7 +19,11 @@ import 'dialogs/create_match_dialog.dart';
 import 'dialogs/edit_match_dialog.dart';
 import '../../../core/utils/share_util.dart';
 import '../../../core/services/admin_auth_service.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../features/auth/providers/auth_providers.dart';
+import '../../widgets/auth_user_button.dart';
 import '../../widgets/batch_points_table_widget.dart';
+import 'dialogs/manage_co_admins_dialog.dart';
 
 class AdminEventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
@@ -109,13 +113,34 @@ class _AdminEventDetailScreenState
         ),
         actions: [
           eventAsync.maybeWhen(
-            data: (event) => event != null
-                ? IconButton(
+            data: (event) {
+              if (event == null) return const SizedBox.shrink();
+              final currentUserEmail = ref.watch(currentUserEmailProvider);
+              final isSuperAdmin = ref.watch(isSuperAdminProvider);
+              final isCreator = event.creatorEmail != null &&
+                  event.creatorEmail!.trim().toLowerCase() == currentUserEmail?.trim().toLowerCase();
+              final canManageCoAdmins = isSuperAdmin || isCreator;
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (canManageCoAdmins)
+                    IconButton(
+                      icon: const Icon(LucideIcons.userCheck),
+                      tooltip: 'Manage Co-Admins & Permissions',
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (_) => ManageCoAdminsDialog(event: event),
+                      ),
+                    ),
+                  IconButton(
                     icon: const Icon(LucideIcons.share2),
                     tooltip: 'Share Fest Link',
                     onPressed: () => _copyShareLink(event.shareSlug),
-                  )
-                : const SizedBox.shrink(),
+                  ),
+                ],
+              );
+            },
             orElse: () => const SizedBox.shrink(),
           ),
           IconButton(
@@ -126,6 +151,9 @@ class _AdminEventDetailScreenState
               ref.invalidate(sportsForEventProvider(widget.eventId));
             },
           ),
+          const SizedBox(width: 4),
+          const AuthUserButton(),
+          const SizedBox(width: 8),
         ],
       ),
       body: eventAsync.when(
@@ -137,47 +165,82 @@ class _AdminEventDetailScreenState
             );
           }
 
-          if (!ref.watch(unlockedEventsProvider).contains(widget.eventId)) {
+          final currentUserEmail = ref.watch(currentUserEmailProvider);
+          final isUnlocked = ref.watch(unlockedEventsProvider).contains(widget.eventId);
+          final hasAdminAuthority = event.canUserAdmin(currentUserEmail) || isUnlocked;
+
+          if (!hasAdminAuthority) {
             return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primarySurface,
-                        shape: BoxShape.circle,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.liveRedSurface,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.liveRed.withValues(alpha: 0.2)),
+                            ),
+                            child: const Icon(
+                              LucideIcons.shieldAlert,
+                              size: 36,
+                              color: AppColors.liveRed,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Organizer Authority Required',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Shared spectator links are view-only. Only the tournament creator (${event.creatorEmail ?? "Organizer"}), authorized co-admins, or global superadmin (${AuthService.superAdminEmail}) can manage fixtures and scoring for "${event.name}".',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.45),
+                          ),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                ),
+                                icon: const Icon(LucideIcons.arrowLeft, size: 16),
+                                label: const Text('View Spectator Arena'),
+                                onPressed: () => context.go('/event/${event.shareSlug}'),
+                              ),
+                              OutlinedButton.icon(
+                                icon: const Icon(LucideIcons.keyRound, size: 16),
+                                label: const Text('Enter PIN (Fallback)'),
+                                onPressed: () => AdminAuthService.promptPin(
+                                  context: context,
+                                  ref: ref,
+                                  event: event,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        LucideIcons.lock,
-                        size: 40,
-                        color: AppColors.primary,
-                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Organizer Passcode Required',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Enter the 4-digit PIN for "${event.name}" to manage sports, schedule fixtures, and access live scorers.',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      icon: const Icon(LucideIcons.keyRound, size: 18),
-                      label: const Text('Enter Organizer PIN'),
-                      onPressed: () => AdminAuthService.promptPin(
-                        context: context,
-                        ref: ref,
-                        event: event,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );

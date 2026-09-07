@@ -95,6 +95,92 @@ final sharedTournamentsProvider =
   SharedTournamentsNotifier.new,
 );
 
+/// Tracks recently opened tournament IDs in chronological order (most recent first)
+class RecentTournamentsNotifier extends Notifier<List<String>> {
+  static const _prefKey = 'recent_opened_tournament_ids';
+
+  @override
+  List<String> build() {
+    _loadFromStorage();
+    return <String>[];
+  }
+
+  Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefKey);
+      if (list != null && list.isNotEmpty) {
+        state = list;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> addRecentEvent(String eventId) async {
+    final updated = [eventId, ...state.where((id) => id != eventId)];
+    if (updated.length > 25) {
+      updated.removeRange(25, updated.length);
+    }
+    state = updated;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, updated);
+    } catch (_) {}
+  }
+
+  Future<void> clearRecent() async {
+    state = [];
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefKey);
+    } catch (_) {}
+  }
+}
+
+final recentTournamentsProvider =
+    NotifierProvider<RecentTournamentsNotifier, List<String>>(
+  RecentTournamentsNotifier.new,
+);
+
+/// Tracks tournament IDs that have been bookmarked/saved by this user/device
+class BookmarkedTournamentsNotifier extends Notifier<Set<String>> {
+  static const _prefKey = 'bookmarked_tournament_ids';
+
+  @override
+  Set<String> build() {
+    _loadFromStorage();
+    return <String>{};
+  }
+
+  Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefKey);
+      if (list != null && list.isNotEmpty) {
+        state = {...state, ...list};
+      }
+    } catch (_) {}
+  }
+
+  Future<void> toggleBookmark(String eventId) async {
+    if (state.contains(eventId)) {
+      state = state.where((id) => id != eventId).toSet();
+    } else {
+      state = {...state, eventId};
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, state.toList());
+    } catch (_) {}
+  }
+
+  bool isBookmarked(String eventId) => state.contains(eventId);
+}
+
+final bookmarkedTournamentsProvider =
+    NotifierProvider<BookmarkedTournamentsNotifier, Set<String>>(
+  BookmarkedTournamentsNotifier.new,
+);
+
 class AdminAuthService {
   AdminAuthService._();
 

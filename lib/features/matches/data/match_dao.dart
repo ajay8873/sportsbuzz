@@ -160,5 +160,40 @@ class MatchDao {
     }
     _mockMatches.removeWhere((m) => m.id == matchId);
   }
+
+  Future<List<MatchModel>> getAllLiveMatches() async {
+    final client = SupabaseConfig.client;
+    if (client != null && SupabaseConfig.isInitialized) {
+      try {
+        final response = await client
+            .from('matches')
+            .select()
+            .eq('status', MatchStatus.live.dbValue)
+            .order('scheduled_time', ascending: false);
+        return (response as List<dynamic>)
+            .map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        debugPrint('Supabase getAllLiveMatches error: $e');
+      }
+    }
+    return _mockMatches.where((m) => m.status == MatchStatus.live).toList();
+  }
+
+  Stream<List<MatchModel>> streamLiveMatches() {
+    final client = SupabaseConfig.client;
+    if (client != null && SupabaseConfig.isInitialized) {
+      try {
+        return client
+            .from('matches')
+            .stream(primaryKey: ['id'])
+            .eq('status', MatchStatus.live.dbValue)
+            .map((maps) => maps.map((m) => MatchModel.fromJson(m)).toList());
+      } catch (e) {
+        debugPrint('Supabase streamLiveMatches error: $e');
+      }
+    }
+    return Stream.value(_mockMatches.where((m) => m.status == MatchStatus.live).toList());
+  }
 }
 

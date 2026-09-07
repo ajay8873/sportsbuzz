@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_config.dart';
+import 'core/services/auth_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,7 @@ Future<void> main() async {
   ]);
 
   await SupabaseConfig.initialize();
+  await AuthService.initialize();
 
   runApp(
     const ProviderScope(

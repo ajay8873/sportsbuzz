@@ -75,3 +75,13 @@ final liveMatchStateStreamProvider =
     enableVideoSyncDelay: params.enableVideoSyncDelay,
   );
 });
+
+final allLiveMatchesStreamProvider = StreamProvider<List<MatchModel>>((ref) {
+  final dao = ref.watch(matchDaoProvider);
+  return dao.streamLiveMatches();
+});
+
+final allLiveMatchesFutureProvider = FutureProvider<List<MatchModel>>((ref) {
+  final dao = ref.watch(matchDaoProvider);
+  return dao.getAllLiveMatches();
+});
