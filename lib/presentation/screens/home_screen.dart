@@ -482,10 +482,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         final event = displayEvents[index];
                         final dateFormat = DateFormat('MMM d, yyyy');
                         final isBookmarked = bookmarkedIds.contains(event.id);
-                        final isRecent = recentIds.contains(event.id);
-                        final isCreator = currentUserEmail != null &&
-                            event.creatorEmail?.trim().toLowerCase() == currentUserEmail.trim().toLowerCase();
-                        final isCoAdmin = !isCreator && event.canUserAdmin(currentUserEmail);
 
                         return Card(
                           elevation: 0,
@@ -518,33 +514,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                event.name,
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            if (isCreator) ...[
-                                              const SizedBox(width: 6),
-                                              _badge('CREATOR', AppColors.zestOrange),
-                                            ] else if (isCoAdmin) ...[
-                                              const SizedBox(width: 6),
-                                              _badge('CO-ADMIN', AppColors.primary),
-                                            ] else if (isRecent) ...[
-                                              const SizedBox(width: 6),
-                                              _badge('RECENT', AppColors.textSecondary),
-                                            ],
-                                          ],
+                                        Text(
+                                          event.name.trim().isEmpty ? 'Tournament (${event.shareSlug})' : event.name.trim(),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.textPrimary,
+                                            letterSpacing: -0.2,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 5),
                                         Row(
                                           children: [
                                             const Icon(
@@ -746,23 +727,4 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _badge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          color: color,
-          letterSpacing: 0.4,
-        ),
-      ),
-    );
-  }
 }
