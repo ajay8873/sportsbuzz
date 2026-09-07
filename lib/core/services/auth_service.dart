@@ -296,6 +296,7 @@ class AuthService {
   static Future<AuthResult> signUpWithPassword({
     required String email,
     required String password,
+    String? displayName,
   }) async {
     final cleanEmail = email.trim().toLowerCase();
     if (cleanEmail.isEmpty || !cleanEmail.contains('@')) {
@@ -317,18 +318,23 @@ class AuthService {
         final response = await client.auth.signUp(
           email: cleanEmail,
           password: password,
+          data: displayName != null && displayName.trim().isNotEmpty
+              ? {'full_name': displayName.trim(), 'name': displayName.trim()}
+              : null,
         );
         final user = response.user;
         if (user != null) {
           final profile = AppUserProfile(
             id: user.id,
             email: user.email ?? cleanEmail,
-            displayName: cleanEmail.split('@').first,
+            displayName: displayName?.trim().isNotEmpty == true
+                ? displayName!.trim()
+                : (user.userMetadata?['full_name'] as String? ?? (user.email ?? cleanEmail).split('@').first),
           );
           _setProfile(profile);
           await saveRememberedEmail(cleanEmail);
           final message = response.session == null
-              ? 'Account registered! Please check your email inbox to confirm if verification is enabled.'
+              ? 'Account registered! If email confirmation is enabled in your Supabase project, please check your email inbox to verify. Otherwise, switch to the "Sign In" tab.'
               : null;
           return AuthResult(success: true, profile: profile, errorMessage: message);
         } else {
@@ -353,7 +359,9 @@ class AuthService {
     final profile = AppUserProfile(
       id: 'usr_${cleanEmail.hashCode.abs()}',
       email: cleanEmail,
-      displayName: cleanEmail.split('@').first,
+      displayName: displayName?.trim().isNotEmpty == true
+          ? displayName!.trim()
+          : cleanEmail.split('@').first,
     );
     _setProfile(profile);
     await saveRememberedEmail(cleanEmail);

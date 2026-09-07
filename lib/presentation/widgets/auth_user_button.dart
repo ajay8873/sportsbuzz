@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -216,6 +217,7 @@ class _SignInDialog extends StatefulWidget {
 }
 
 class _SignInDialogState extends State<_SignInDialog> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -223,16 +225,23 @@ class _SignInDialogState extends State<_SignInDialog> {
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
+  StreamSubscription<AppUserProfile?>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadAutofetchedEmail();
+    // Auto-dismiss dialog as soon as user logs in (e.g. from Google OAuth callback)
+    _authSubscription = AuthService.onAuthStateChange.listen((profile) {
+      if (profile != null && mounted) {
+        Navigator.of(context).maybePop();
+      }
+    });
   }
 
   Future<void> _loadAutofetchedEmail() async {
     final email = await AuthService.getAutofetchedEmail();
-    if (mounted && _emailController.text.isEmpty) {
+    if (mounted && _emailController.text.isEmpty && email.isNotEmpty) {
       setState(() {
         _emailController.text = email;
       });
@@ -241,6 +250,8 @@ class _SignInDialogState extends State<_SignInDialog> {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -249,6 +260,15 @@ class _SignInDialogState extends State<_SignInDialog> {
   Future<void> _handleSubmit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final name = _nameController.text.trim();
+
+    if (_isSignUp && name.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your name.';
+        _successMessage = null;
+      });
+      return;
+    }
 
     if (email.isEmpty || !email.contains('@')) {
       setState(() {
@@ -281,7 +301,11 @@ class _SignInDialogState extends State<_SignInDialog> {
     });
 
     final result = _isSignUp
-        ? await AuthService.signUpWithPassword(email: email, password: password)
+        ? await AuthService.signUpWithPassword(
+            email: email,
+            password: password,
+            displayName: name.isNotEmpty ? name : null,
+          )
         : await AuthService.signInWithPassword(email: email, password: password);
 
     if (!mounted) return;
@@ -292,12 +316,11 @@ class _SignInDialogState extends State<_SignInDialog> {
 
     if (result.success) {
       if (result.errorMessage != null) {
-        // e.g. Email confirmation notice
         setState(() {
           _successMessage = result.errorMessage;
         });
       } else {
-        Navigator.of(context).pop();
+        Navigator.of(context).maybePop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -340,7 +363,7 @@ class _SignInDialogState extends State<_SignInDialog> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              _isSignUp ? 'Create Account' : 'Account Login',
+              _isSignUp ? 'Create New Account' : 'Sign In',
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
           ),
@@ -351,13 +374,98 @@ class _SignInDialogState extends State<_SignInDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Mode Segmented Selector (Sign In vs Create Account)
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border),
+              ),
+              padding: const EdgeInsets.all(3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isSignUp = false;
+                          _errorMessage = null;
+                          _successMessage = null;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: !_isSignUp ? AppColors.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Sign In',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: !_isSignUp ? Colors.white : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isSignUp = true;
+                          _errorMessage = null;
+                          _successMessage = null;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _isSignUp ? AppColors.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Create Account',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: _isSignUp ? Colors.white : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
             Text(
               _isSignUp
-                  ? 'Create an account to host tournaments, manage scorecards, and personalize feeds.'
-                  : 'Enter your email & password to sign in. Superadmin status is recognized via Supabase.',
+                  ? 'Register your account to host tournaments, add co-admins, and customize your experience.'
+                  : 'Log in with your registered email and password. Superadmin access is verified automatically.',
               style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.3),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
+
+            // Full Name (Only on Create Account mode)
+            if (_isSignUp) ...[
+              TextField(
+                controller: _nameController,
+                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  hintText: 'e.g. Ajay Mehta',
+                  prefixIcon: Icon(LucideIcons.user, size: 16),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // Email Address
             TextField(
@@ -392,7 +500,7 @@ class _SignInDialogState extends State<_SignInDialog> {
               onSubmitted: (_) => _handleSubmit(),
               decoration: InputDecoration(
                 labelText: 'Password',
-                hintText: _isSignUp ? 'At least 6 characters' : 'Enter password',
+                hintText: _isSignUp ? 'At least 6 characters' : 'Enter your password',
                 prefixIcon: const Icon(LucideIcons.lock, size: 16),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -463,7 +571,7 @@ class _SignInDialogState extends State<_SignInDialog> {
               const SizedBox(height: 12),
             ],
 
-            // Sign In / Sign Up Submit Button
+            // Submit Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -483,35 +591,7 @@ class _SignInDialogState extends State<_SignInDialog> {
                       style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                     ),
             ),
-            const SizedBox(height: 10),
-
-            // Toggle Sign In vs Sign Up
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isSignUp = !_isSignUp;
-                    _errorMessage = null;
-                    _successMessage = null;
-                  });
-                },
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                ),
-                child: Text(
-                  _isSignUp
-                      ? 'Already have an account? Sign In'
-                      : "Don't have an account yet? Create Account",
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             Row(
               children: [
