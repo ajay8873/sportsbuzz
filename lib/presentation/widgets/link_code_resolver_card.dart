@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/services/admin_auth_service.dart';
 import '../../features/events/models/event_model.dart';
 import '../../features/events/providers/event_providers.dart';
 
@@ -90,6 +91,7 @@ class _LinkCodeResolverCardState extends ConsumerState<LinkCodeResolverCard> {
           _showDisambiguationSheet(matches);
           return;
         } else if (matches.length == 1) {
+          ref.read(sharedTournamentsProvider.notifier).addSharedEvent(matches.first.id);
           context.push('/event/${matches.first.shareSlug}');
           return;
         } else {
@@ -195,6 +197,7 @@ class _LinkCodeResolverCardState extends ConsumerState<LinkCodeResolverCard> {
                     ),
                     trailing: const Icon(LucideIcons.chevronRight, size: 18, color: AppColors.textMuted),
                     onTap: () {
+                      ref.read(sharedTournamentsProvider.notifier).addSharedEvent(event.id);
                       Navigator.of(ctx).pop();
                       context.push('/event/${event.shareSlug}');
                     },

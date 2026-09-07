@@ -10,7 +10,6 @@ import '../../core/utils/share_util.dart';
 import '../../features/events/models/event_model.dart';
 import '../../features/events/providers/event_providers.dart';
 import '../common/empty_state_view.dart';
-import '../widgets/batch_points_table_widget.dart';
 import '../widgets/link_code_resolver_card.dart';
 import '../widgets/sports_engine_showcase_widget.dart';
 import 'admin/dialogs/create_event_dialog.dart';
@@ -264,11 +263,7 @@ class HomeScreen extends ConsumerWidget {
                 const LinkCodeResolverCard(),
                 const SizedBox(height: 24),
 
-                // 3. Medical College Batch Points Table
-                const BatchPointsTableWidget(),
-                const SizedBox(height: 24),
-
-                // 4. Active Fests & Tournaments
+                // 3. Active Fests & Tournaments
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

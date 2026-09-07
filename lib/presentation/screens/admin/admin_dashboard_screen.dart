@@ -11,6 +11,8 @@ import '../../common/empty_state_view.dart';
 import '../../../core/utils/share_util.dart';
 import 'dialogs/create_event_dialog.dart';
 
+import '../../../core/services/admin_auth_service.dart';
+
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
@@ -33,9 +35,131 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _promptUnlockByCode(BuildContext context, WidgetRef ref) async {
+    final codeController = TextEditingController();
+    final pinController = TextEditingController();
+    String? errorMessage;
+    bool isSubmitting = false;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Row(
+                children: [
+                  Icon(LucideIcons.keyRound, color: AppColors.primary, size: 20),
+                  SizedBox(width: 8),
+                  Text('Unlock Shared Fest'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Enter tournament invite code and admin PIN to add it to your Admin Portal.',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: codeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tournament Code or URL',
+                      hintText: 'e.g. plexus-2026',
+                      prefixIcon: Icon(LucideIcons.link, size: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: pinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Admin PIN',
+                      hintText: 'e.g. 1234',
+                      prefixIcon: Icon(LucideIcons.lock, size: 18),
+                    ),
+                  ),
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      errorMessage!,
+                      style: const TextStyle(color: AppColors.liveRed, fontSize: 12),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final code = codeController.text.trim();
+                          final pin = pinController.text.trim();
+                          if (code.isEmpty) {
+                            setState(() => errorMessage = 'Please enter tournament code.');
+                            return;
+                          }
+                          setState(() {
+                            isSubmitting = true;
+                            errorMessage = null;
+                          });
+
+                          final dao = ref.read(eventDaoProvider);
+                          final event = await dao.getEventBySlug(code);
+                          if (event == null) {
+                            setState(() {
+                              isSubmitting = false;
+                              errorMessage = 'Tournament not found. Check code.';
+                            });
+                            return;
+                          }
+
+                          final expectedPin = (event.adminPin != null && event.adminPin!.isNotEmpty)
+                              ? event.adminPin!
+                              : '1234';
+
+                          if (pin != expectedPin) {
+                            setState(() {
+                              isSubmitting = false;
+                              errorMessage = 'Incorrect Admin PIN.';
+                            });
+                            return;
+                          }
+
+                          await ref.read(unlockedEventsProvider.notifier).unlock(event.id);
+                          await ref.read(sharedTournamentsProvider.notifier).addSharedEvent(event.id);
+                          ref.invalidate(adminSharedEventsProvider);
+
+                          if (ctx.mounted) {
+                            Navigator.of(ctx).pop();
+                            context.push('/admin/events/${event.id}');
+                          }
+                        },
+                  child: const Text('Unlock & Open'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(allEventsProvider);
+    final eventsAsync = ref.watch(adminSharedEventsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,9 +182,14 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(LucideIcons.keyRound),
+            tooltip: 'Unlock Tournament with Code/PIN',
+            onPressed: () => _promptUnlockByCode(context, ref),
+          ),
+          IconButton(
             icon: const Icon(LucideIcons.refreshCw),
             tooltip: 'Refresh Events',
-            onPressed: () => ref.invalidate(allEventsProvider),
+            onPressed: () => ref.invalidate(adminSharedEventsProvider),
           ),
         ],
       ),
@@ -75,7 +204,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             builder: (_) => const CreateEventDialog(),
           );
           if (newEvent != null && context.mounted) {
-            ref.invalidate(allEventsProvider);
+            ref.invalidate(adminSharedEventsProvider);
             context.push('/admin/events/${newEvent.id}');
           }
         },
@@ -93,12 +222,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'University Athletic Meets & Fests',
+                      'Managed & Shared Tournaments',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Manage sports fixtures, assign scorers, and broadcast live scores.',
+                      'Only tournaments created by you or unlocked via organizer PIN are shown here.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -109,19 +238,39 @@ class AdminDashboardScreen extends ConsumerWidget {
                     data: (events) {
                       if (events.isEmpty) {
                         return EmptyStateView(
-                          icon: LucideIcons.calendar,
-                          title: 'No Active Fests Found',
+                          icon: LucideIcons.shieldAlert,
+                          title: 'No Managed Tournaments Found',
                           message:
-                              'Create your first college fest to start scheduling matches and live streams.',
-                          action: ElevatedButton.icon(
-                            icon: const Icon(LucideIcons.plus, size: 16),
-                            label: const Text('Create Fest'),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => const CreateEventDialog(),
-                              );
-                            },
+                              'This Admin Portal only shows tournaments created on this device or unlocked with an admin PIN.',
+                          action: Wrap(
+                            spacing: 12,
+                            runSpacing: 10,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                ),
+                                icon: const Icon(LucideIcons.plus, size: 16),
+                                label: const Text('Host Tournament'),
+                                onPressed: () async {
+                                  final newEvent = await showDialog<EventModel?>(
+                                    context: context,
+                                    builder: (_) => const CreateEventDialog(),
+                                  );
+                                  if (newEvent != null && context.mounted) {
+                                    ref.invalidate(adminSharedEventsProvider);
+                                    context.push('/admin/events/${newEvent.id}');
+                                  }
+                                },
+                              ),
+                              OutlinedButton.icon(
+                                icon: const Icon(LucideIcons.keyRound, size: 16),
+                                label: const Text('Unlock with PIN / Code'),
+                                onPressed: () => _promptUnlockByCode(context, ref),
+                              ),
+                            ],
                           ),
                         );
                       }

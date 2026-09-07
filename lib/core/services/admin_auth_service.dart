@@ -4,17 +4,42 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../constants/app_colors.dart';
 import '../../features/events/models/event_model.dart';
 
-/// Tracks which event IDs have been unlocked via PIN in the current session
-class UnlockedEventsNotifier extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => <String>{};
+import 'package:shared_preferences/shared_preferences.dart';
 
-  void unlock(String eventId) {
-    state = {...state, eventId};
+/// Tracks which event IDs have been unlocked via PIN on this device
+class UnlockedEventsNotifier extends Notifier<Set<String>> {
+  static const _prefKey = 'unlocked_tournament_ids';
+
+  @override
+  Set<String> build() {
+    _loadFromStorage();
+    return <String>{};
   }
 
-  void lock(String eventId) {
+  Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefKey);
+      if (list != null && list.isNotEmpty) {
+        state = {...state, ...list};
+      }
+    } catch (_) {}
+  }
+
+  Future<void> unlock(String eventId) async {
+    state = {...state, eventId};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, state.toList());
+    } catch (_) {}
+  }
+
+  Future<void> lock(String eventId) async {
     state = state.where((id) => id != eventId).toSet();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, state.toList());
+    } catch (_) {}
   }
 
   bool isUnlocked(String eventId) => state.contains(eventId);
@@ -23,6 +48,51 @@ class UnlockedEventsNotifier extends Notifier<Set<String>> {
 final unlockedEventsProvider =
     NotifierProvider<UnlockedEventsNotifier, Set<String>>(
   UnlockedEventsNotifier.new,
+);
+
+/// Tracks tournament IDs that have been shared with, created on, or accessed by this device
+class SharedTournamentsNotifier extends Notifier<Set<String>> {
+  static const _prefKey = 'shared_tournament_ids';
+
+  @override
+  Set<String> build() {
+    _loadFromStorage();
+    return <String>{};
+  }
+
+  Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefKey);
+      if (list != null && list.isNotEmpty) {
+        state = {...state, ...list};
+      }
+    } catch (_) {}
+  }
+
+  Future<void> addSharedEvent(String eventId) async {
+    if (state.contains(eventId)) return;
+    state = {...state, eventId};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, state.toList());
+    } catch (_) {}
+  }
+
+  Future<void> removeSharedEvent(String eventId) async {
+    state = state.where((id) => id != eventId).toSet();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefKey, state.toList());
+    } catch (_) {}
+  }
+
+  bool isShared(String eventId) => state.contains(eventId);
+}
+
+final sharedTournamentsProvider =
+    NotifierProvider<SharedTournamentsNotifier, Set<String>>(
+  SharedTournamentsNotifier.new,
 );
 
 class AdminAuthService {
@@ -123,6 +193,7 @@ class AdminAuthService {
                       final input = pinController.text.trim();
                       if (input == expectedPin) {
                         ref.read(unlockedEventsProvider.notifier).unlock(event.id);
+                        ref.read(sharedTournamentsProvider.notifier).addSharedEvent(event.id);
                         Navigator.of(ctx).pop(true);
                       } else {
                         setState(() {
@@ -147,6 +218,7 @@ class AdminAuthService {
                     final input = pinController.text.trim();
                     if (input == expectedPin) {
                       ref.read(unlockedEventsProvider.notifier).unlock(event.id);
+                      ref.read(sharedTournamentsProvider.notifier).addSharedEvent(event.id);
                       Navigator.of(ctx).pop(true);
                     } else {
                       setState(() {

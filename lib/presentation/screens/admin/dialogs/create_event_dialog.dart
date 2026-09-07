@@ -121,10 +121,12 @@ class _CreateEventDialogState extends ConsumerState<CreateEventDialog> {
 
     await dao.createEvent(newEvent);
 
-    // Auto-unlock for event creator in this session
-    ref.read(unlockedEventsProvider.notifier).unlock(newEvent.id);
+    // Auto-unlock & mark as shared for event creator on this device
+    await ref.read(unlockedEventsProvider.notifier).unlock(newEvent.id);
+    await ref.read(sharedTournamentsProvider.notifier).addSharedEvent(newEvent.id);
 
     ref.invalidate(allEventsProvider);
+    ref.invalidate(adminSharedEventsProvider);
     ref.invalidate(sportsForEventProvider(newEvent.id));
 
     if (mounted) {

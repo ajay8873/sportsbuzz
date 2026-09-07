@@ -117,6 +117,11 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
             );
           }
 
+          // Record as shared tournament on this device
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(sharedTournamentsProvider.notifier).addSharedEvent(event.id);
+          });
+
           final sportsAsync = ref.watch(sportsForEventProvider(event.id));
 
           return RefreshIndicator(
