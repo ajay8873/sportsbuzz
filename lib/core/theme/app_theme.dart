@@ -66,6 +66,14 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      ),
       textTheme: baseTextTheme.copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,

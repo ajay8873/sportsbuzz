@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sportsbuzz/main.dart';
+import 'package:zest/main.dart';
 
 void main() {
-  testWidgets('SportsBuzzApp smoke test', (WidgetTester tester) async {
+  testWidgets('ZestApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
-        child: SportsBuzzApp(),
+        child: ZestApp(),
       ),
     );
 
-    expect(find.text('SportsBuzz Campus'), findsOneWidget);
+    expect(find.text('ZEST'), findsOneWidget);
   });
 }

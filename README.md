@@ -1,6 +1,6 @@
-# SportsBuzz — University Fest Live Scoring & Streaming Platform
+# Zest — University Fest Live Scoring & Streaming Platform
 
-**SportsBuzz** is a zero-cost, high-concurrency real-time sports scoring and live-streaming platform tailored for university fests, college tournaments, and athletic meets. Built with a unified **Flutter** cross-platform codebase compiling to both a Progressive Web App (for thousands of live spectators) and mobile apps (for event admins and field scorers).
+**Zest** is a zero-cost, high-concurrency real-time sports scoring and live-streaming platform tailored for university fests, college tournaments, and athletic meets. Built with a unified **Flutter** cross-platform codebase compiling to both a Progressive Web App (for thousands of live spectators) and mobile apps (for event admins and field scorers).
 
 ---
 

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.sportsbuzz" "\0"
-            VALUE "FileDescription", "sportsbuzz" "\0"
+            VALUE "FileDescription", "zest" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "sportsbuzz" "\0"
+            VALUE "InternalName", "zest" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.sportsbuzz. All rights reserved." "\0"
-            VALUE "OriginalFilename", "sportsbuzz.exe" "\0"
-            VALUE "ProductName", "sportsbuzz" "\0"
+            VALUE "OriginalFilename", "zest.exe" "\0"
+            VALUE "ProductName", "zest" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

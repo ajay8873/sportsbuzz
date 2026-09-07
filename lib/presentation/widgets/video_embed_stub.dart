@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import '../../core/constants/app_colors.dart';
+import '../screens/fullscreen_video_screen.dart';
 
 Widget buildPlatformVideoPlayer({
   required String streamUrl,
@@ -200,37 +201,80 @@ class _EmbeddedMobileLivePlayerState extends State<_EmbeddedMobileLivePlayer> {
           Positioned(
             top: 8,
             right: 8,
-            child: Material(
-              color: Colors.black.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(6),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(6),
-                onTap: () async {
-                  final uri = Uri.tryParse(widget.streamUrl.trim());
-                  if (uri != null) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(LucideIcons.externalLink,
-                          size: 13, color: Colors.white),
-                      SizedBox(width: 4),
-                      Text(
-                        'Open',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Fullscreen Landscape Streaming Mode
+                Material(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(6),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FullscreenVideoScreen(
+                            streamUrl: widget.streamUrl,
+                            isLive: widget.isLive,
+                          ),
                         ),
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.maximize2,
+                              size: 13, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            'Landscape',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 6),
+                Material(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(6),
+                    onTap: () async {
+                      final uri = Uri.tryParse(widget.streamUrl.trim());
+                      if (uri != null) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.externalLink,
+                              size: 13, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            'Open',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

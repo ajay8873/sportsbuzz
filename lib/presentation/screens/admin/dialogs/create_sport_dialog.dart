@@ -179,12 +179,15 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
             key: _formKey,
             child: SingleChildScrollView(
               child: Column(
@@ -298,6 +301,7 @@ class _CreateSportDialogState extends ConsumerState<CreateSportDialog> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

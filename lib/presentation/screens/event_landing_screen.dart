@@ -12,6 +12,7 @@ import '../../features/matches/models/match_status.dart';
 import '../../features/matches/providers/match_providers.dart';
 import '../common/empty_state_view.dart';
 import '../widgets/match_card.dart';
+import '../widgets/batch_points_table_widget.dart';
 import '../../../core/utils/share_util.dart';
 import '../../core/services/admin_auth_service.dart';
 
@@ -25,6 +26,7 @@ class EventLandingScreen extends ConsumerStatefulWidget {
 }
 
 class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
+  int _currentViewerTab = 0; // 0 = Matches & Fixtures, 1 = Points Table & Standings
   String _selectedCategory = 'all'; // 'all', 'outdoor', 'indoor'
   String _selectedSportId = 'all'; // 'all' or specific sport ID
   MatchStatus _selectedStatusTab = MatchStatus.live;
@@ -61,7 +63,16 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
         ),
         title: Row(
           children: [
-            const Icon(LucideIcons.flame, color: AppColors.primary, size: 20),
+            Image.asset(
+              'assets/icons/app_icon.png',
+              width: 22,
+              height: 22,
+              errorBuilder: (_, _, _) => const Icon(
+                LucideIcons.trophy,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -223,8 +234,129 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Outdoor / Indoor / All Categories Segmented Switcher
-                    Row(
+                    // Audience Mode Switcher: Matches & Fixtures vs Points Table
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => setState(() => _currentViewerTab = 0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: _currentViewerTab == 0
+                                      ? AppColors.surface
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: _currentViewerTab == 0
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.04),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.radio,
+                                      size: 15,
+                                      color: _currentViewerTab == 0
+                                          ? AppColors.cricbuzzGreen
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Matches & Fixtures',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: _currentViewerTab == 0
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: _currentViewerTab == 0
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => setState(() => _currentViewerTab = 1),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: _currentViewerTab == 1
+                                      ? AppColors.surface
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: _currentViewerTab == 1
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.04),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.trophy,
+                                      size: 15,
+                                      color: _currentViewerTab == 1
+                                          ? AppColors.cricbuzzGreen
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Points Table (${event.standings.length})',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: _currentViewerTab == 1
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: _currentViewerTab == 1
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    if (_currentViewerTab == 1) ...[
+                      BatchPointsTableWidget(
+                        event: event,
+                        showAdminControls: false,
+                      ),
+                    ] else ...[
+                      // Outdoor / Indoor / All Categories Segmented Switcher
+                      Row(
                       children: [
                         SegmentedButton<String>(
                           segments: const [
@@ -396,6 +528,7 @@ class _EventLandingScreenState extends ConsumerState<EventLandingScreen> {
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Text('Error loading sports: $e'),
                     ),
+                    ],
                   ],
                 ),
               ),

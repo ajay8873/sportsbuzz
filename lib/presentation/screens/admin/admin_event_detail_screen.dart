@@ -19,6 +19,7 @@ import 'dialogs/create_match_dialog.dart';
 import 'dialogs/edit_match_dialog.dart';
 import '../../../core/utils/share_util.dart';
 import '../../../core/services/admin_auth_service.dart';
+import '../../widgets/batch_points_table_widget.dart';
 
 class AdminEventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
@@ -32,8 +33,8 @@ class AdminEventDetailScreen extends ConsumerStatefulWidget {
 
 class _AdminEventDetailScreenState
     extends ConsumerState<AdminEventDetailScreen> {
+  int _currentAdminTab = 0; // 0 = Sports & Matches, 1 = Standings & Points Table
   String _activeCategory = 'all'; // 'all', 'outdoor', 'indoor'
-  String? _selectedSportId;
 
   void _copyShareLink(String shareSlug) {
     final link = ShareUtil.getEventShareUrl(shareSlug);
@@ -263,207 +264,249 @@ class _AdminEventDetailScreenState
                     ),
                     const SizedBox(height: 20),
 
-                    // Category Switcher (All / Outdoor / Indoor)
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.spaceBetween,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(
-                              value: 'all',
-                              label: Text('All Sports'),
-                              icon: Icon(LucideIcons.layers, size: 15),
-                            ),
-                            ButtonSegment(
-                              value: 'outdoor',
-                              label: Text('Outdoor'),
-                              icon: Icon(LucideIcons.sun, size: 15),
-                            ),
-                            ButtonSegment(
-                              value: 'indoor',
-                              label: Text('Indoor'),
-                              icon: Icon(LucideIcons.home, size: 15),
-                            ),
-                          ],
-                          selected: {_activeCategory},
-                          onSelectionChanged: (set) {
-                            setState(() {
-                              _activeCategory = set.first;
-                              _selectedSportId = null;
-                            });
-                          },
-                        ),
-                        ElevatedButton.icon(
-                          icon: const Icon(LucideIcons.plus, size: 16),
-                          label: const Text('Add Sport'),
-                          onPressed: () async {
-                            final createdSport = await showDialog(
-                              context: context,
-                              builder: (_) =>
-                                  CreateSportDialog(eventId: widget.eventId),
-                            );
-                            if (createdSport != null && mounted) {
-                              setState(() {
-                                _activeCategory = 'all';
-                                _selectedSportId = createdSport.id;
-                              });
-                              ref.invalidate(sportsForEventProvider(widget.eventId));
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Sports Chips List
-                    sportsAsync.when(
-                      data: (sports) {
-                        final filteredSports = sports.where((s) {
-                          if (_activeCategory == 'outdoor') {
-                            return s.category == SportCategory.outdoor;
-                          } else if (_activeCategory == 'indoor') {
-                            return s.category == SportCategory.indoor;
-                          }
-                          return true;
-                        }).toList();
-
-                        if (filteredSports.isEmpty) {
-                          return Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'No sports added in this category yet. Tap "Add Sport" to add one.',
-                                style: TextStyle(
-                                    color: AppColors.textSecondary),
+                    // Admin Mode Switcher: Sports & Fixtures vs Points Table
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => setState(() => _currentAdminTab = 0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: _currentAdminTab == 0
+                                      ? AppColors.surface
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: _currentAdminTab == 0
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.04),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.gamepad2,
+                                      size: 15,
+                                      color: _currentAdminTab == 0
+                                          ? AppColors.cricbuzzGreen
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Sports & Fixtures',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: _currentAdminTab == 0
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: _currentAdminTab == 0
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          );
-                        }
-
-                        // Auto-select first if none selected or if selected is not in filtered
-                        if (_selectedSportId == null ||
-                            !filteredSports.any((s) => s.id == _selectedSportId)) {
-                          _selectedSportId = filteredSports.first.id;
-                        }
-
-                        final selectedSport = filteredSports.firstWhere(
-                          (s) => s.id == _selectedSportId,
-                          orElse: () => filteredSports.first,
-                        );
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: filteredSports.map((sport) {
-                                  final isSelected =
-                                      sport.id == _selectedSportId;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: ChoiceChip(
-                                      avatar: Icon(
-                                        sport.category == SportCategory.outdoor
-                                            ? LucideIcons.trophy
-                                            : LucideIcons.crown,
-                                        size: 15,
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => setState(() => _currentAdminTab = 1),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: _currentAdminTab == 1
+                                      ? AppColors.surface
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: _currentAdminTab == 1
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.04),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.trophy,
+                                      size: 15,
+                                      color: _currentAdminTab == 1
+                                          ? AppColors.cricbuzzGreen
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Points Table (${event.standings.length})',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: _currentAdminTab == 1
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: _currentAdminTab == 1
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
                                       ),
-                                      label: Text(sport.name),
-                                      selected: isSelected,
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          setState(() =>
-                                              _selectedSportId = sport.id);
-                                        }
-                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    if (_currentAdminTab == 1) ...[
+                      BatchPointsTableWidget(
+                        event: event,
+                        showAdminControls: true,
+                      ),
+                    ] else ...[
+                      // Category Switcher (All / Outdoor / Indoor)
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'all',
+                                label: Text('All Sports'),
+                                icon: Icon(LucideIcons.layers, size: 15),
+                              ),
+                              ButtonSegment(
+                                value: 'outdoor',
+                                label: Text('Outdoor'),
+                                icon: Icon(LucideIcons.sun, size: 15),
+                              ),
+                              ButtonSegment(
+                                value: 'indoor',
+                                label: Text('Indoor'),
+                                icon: Icon(LucideIcons.home, size: 15),
+                              ),
+                            ],
+                            selected: {_activeCategory},
+                            onSelectionChanged: (set) {
+                              setState(() {
+                                _activeCategory = set.first;
+                              });
+                            },
+                          ),
+                          ElevatedButton.icon(
+                            icon: const Icon(LucideIcons.plus, size: 16),
+                            label: const Text('Add Sport'),
+                            onPressed: () async {
+                              final createdSport = await showDialog(
+                                context: context,
+                                builder: (_) =>
+                                    CreateSportDialog(eventId: widget.eventId),
+                              );
+                              if (createdSport != null && mounted) {
+                                setState(() {
+                                  _activeCategory = 'all';
+                                });
+                                ref.invalidate(
+                                    sportsForEventProvider(widget.eventId));
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Sports Chips List
+                      sportsAsync.when(
+                        data: (sports) {
+                          final filteredSports = sports.where((s) {
+                            if (_activeCategory == 'outdoor') {
+                              return s.category == SportCategory.outdoor;
+                            } else if (_activeCategory == 'indoor') {
+                              return s.category == SportCategory.indoor;
+                            }
+                            return true;
+                          }).toList();
+
+                          if (filteredSports.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'No sports added in this category yet. Tap "Add Sport" to add one.',
+                                  style: TextStyle(
+                                      color: AppColors.textSecondary),
+                                ),
+                              ),
+                            );
+                          }
+
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filteredSports.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 18),
+                            itemBuilder: (context, index) {
+                              final sport = filteredSports[index];
+                              return _SportCard(
+                                sport: sport,
+                                onScheduleMatch: () async {
+                                  final created = await showDialog(
+                                    context: context,
+                                    builder: (_) => CreateMatchDialog(
+                                      sportId: sport.id,
+                                      sportName: sport.name,
+                                      scoringModel: sport.scoringModel,
                                     ),
                                   );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Fixtures Section for Selected Sport
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 10,
-                              alignment: WrapAlignment.spaceBetween,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${selectedSport.name} Fixtures',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                    Text(
-                                      'Scoring Model: ${selectedSport.scoringModel.label}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    OutlinedButton.icon(
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.liveRed,
-                                        side: BorderSide(color: AppColors.liveRed.withValues(alpha: 0.4)),
-                                      ),
-                                      icon: const Icon(LucideIcons.trash2, size: 15),
-                                      label: const Text('Delete Sport'),
-                                      onPressed: () => _confirmDeleteSport(selectedSport),
-                                    ),
-                                    ElevatedButton.icon(
-                                      icon: const Icon(LucideIcons.plus, size: 16),
-                                      label: const Text('Schedule Match'),
-                                      onPressed: () async {
-                                        final created = await showDialog(
-                                          context: context,
-                                          builder: (_) => CreateMatchDialog(
-                                            sportId: selectedSport.id,
-                                            sportName: selectedSport.name,
-                                            scoringModel: selectedSport.scoringModel,
-                                          ),
-                                        );
-                                        if (created != null) {
-                                          ref.invalidate(matchesForSportProvider(selectedSport.id));
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            _SportFixturesList(sport: selectedSport),
-                          ],
-                        );
-                      },
-                      loading: () => const Center(
-                          child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: CircularProgressIndicator(),
-                      )),
-                      error: (e, _) => Text('Error loading sports: $e'),
-                    ),
+                                  if (created != null) {
+                                    ref.invalidate(
+                                        matchesForSportProvider(sport.id));
+                                  }
+                                },
+                                onDeleteSport: () =>
+                                    _confirmDeleteSport(sport),
+                              );
+                            },
+                          );
+                        },
+                        loading: () => const Center(
+                            child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(),
+                        )),
+                        error: (e, _) => Text('Error loading sports: $e'),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -477,10 +520,180 @@ class _AdminEventDetailScreenState
   }
 }
 
+class _SportCard extends StatelessWidget {
+  final SportModel sport;
+  final VoidCallback onScheduleMatch;
+  final VoidCallback onDeleteSport;
+
+  const _SportCard({
+    required this.sport,
+    required this.onScheduleMatch,
+    required this.onDeleteSport,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Sport Header Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceAlt,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySurface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    sport.category == SportCategory.outdoor
+                        ? LucideIcons.trophy
+                        : LucideIcons.crown,
+                    color: AppColors.primary,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        sport.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Text(
+                              sport.category.name.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              sport.scoringModel.label,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+
+                // Delete Icon Button (Icon only)
+                IconButton(
+                  style: IconButton.styleFrom(
+                    foregroundColor: AppColors.liveRed,
+                    backgroundColor: AppColors.liveRedSurface,
+                    padding: const EdgeInsets.all(7),
+                    minimumSize: const Size(34, 34),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color: AppColors.liveRed.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: const Icon(LucideIcons.trash2, size: 15),
+                  tooltip: 'Delete ${sport.name}',
+                  onPressed: onDeleteSport,
+                ),
+                const SizedBox(width: 6),
+
+                // Schedule Button
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: const Icon(LucideIcons.plus, size: 13),
+                  label: const Text(
+                    'Schedule',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: onScheduleMatch,
+                ),
+              ],
+            ),
+          ),
+
+          // Box-like Structure Below for Fixtures
+          Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: _SportFixturesList(
+              sport: sport,
+              onScheduleMatch: onScheduleMatch,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SportFixturesList extends ConsumerWidget {
   final SportModel sport;
+  final VoidCallback? onScheduleMatch;
 
-  const _SportFixturesList({required this.sport});
+  const _SportFixturesList({
+    required this.sport,
+    this.onScheduleMatch,
+  });
 
   void _confirmDeleteMatch(BuildContext context, WidgetRef ref, MatchModel match) {
     showDialog(
@@ -524,11 +737,63 @@ class _SportFixturesList extends ConsumerWidget {
     return matchesAsync.when(
       data: (matches) {
         if (matches.isEmpty) {
-          return EmptyStateView(
-            icon: LucideIcons.calendarX,
-            title: 'No Matches Scheduled',
-            message:
-                'Tap "Schedule Match" to add fixtures for ${sport.name}.',
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.6),
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  LucideIcons.calendarDays,
+                  size: 28,
+                  color: AppColors.textSecondary.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'No fixtures scheduled for ${sport.name}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Add fixtures to start live scoring and track results.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (onScheduleMatch != null) ...[
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Icon(LucideIcons.plus, size: 14),
+                    label: const Text(
+                      'Schedule Fixture Now',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: onScheduleMatch,
+                  ),
+                ],
+              ],
+            ),
           );
         }
 

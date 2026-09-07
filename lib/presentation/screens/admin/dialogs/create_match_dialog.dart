@@ -131,12 +131,14 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: 520,
+          maxWidth: 540,
           maxHeight: MediaQuery.of(context).size.height * 0.85,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
             key: _formKey,
             child: SingleChildScrollView(
               child: Column(
@@ -320,6 +322,7 @@ class _CreateMatchDialogState extends ConsumerState<CreateMatchDialog> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

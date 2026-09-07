@@ -32,6 +32,36 @@ class ViewerMatchScreen extends ConsumerStatefulWidget {
 
 class _ViewerMatchScreenState extends ConsumerState<ViewerMatchScreen> {
   bool _enableVideoSyncDelay = false;
+  bool _isLandscapeAllowed = false;
+
+  void _syncOrientation(String? streamUrl) {
+    final hasStream = streamUrl != null && streamUrl.trim().isNotEmpty;
+    if (hasStream && !_isLandscapeAllowed) {
+      _isLandscapeAllowed = true;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else if (!hasStream && _isLandscapeAllowed) {
+      _isLandscapeAllowed = false;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
+  }
+
+  @override
+  void dispose() {
+    // Always restore strict portrait lock upon exiting match viewer
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
 
   void _copyMatchLink() {
     final link = ShareUtil.getMatchShareUrl(widget.matchId);
@@ -55,6 +85,8 @@ class _ViewerMatchScreenState extends ConsumerState<ViewerMatchScreen> {
   @override
   Widget build(BuildContext context) {
     final matchAsync = ref.watch(matchByIdProvider(widget.matchId));
+    final streamUrl = matchAsync.valueOrNull?.streamUrl;
+    _syncOrientation(streamUrl);
 
     return Scaffold(
       appBar: AppBar(

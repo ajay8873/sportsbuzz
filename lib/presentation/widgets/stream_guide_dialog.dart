@@ -34,10 +34,13 @@ class StreamGuideDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 640, maxHeight: 680),
-        child: Column(
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
           children: [
             // Header
             Container(
@@ -109,7 +112,7 @@ class StreamGuideDialog extends StatelessWidget {
                         '2. Tap "Add your Camera to OBS / Live".',
                         '3. Enter your fest room name (e.g. "plexus_ground1") and allow camera access.',
                         '4. Copy the generated "View Link" (e.g. https://vdo.ninja/?view=plexus_ground1).',
-                        '5. Paste that View Link into the Stream URL input box in SportsBuzz!',
+                        '5. Paste that View Link into the Stream URL input box in Zest!',
                       ],
                       quickCopyText: 'https://vdo.ninja/?view=YOUR_FEST_NAME',
                       quickCopyLabel: 'VDO.Ninja Template Link',
@@ -132,7 +135,7 @@ class StreamGuideDialog extends StatelessWidget {
                         '1. On your PC or phone, open livepeer.studio and create a free account.',
                         '2. Click "Create Stream", name your match (e.g. "Final Match"), and click Create.',
                         '3. Copy the "Playback URL" (ends in .m3u8).',
-                        '4. Paste that .m3u8 Playback URL into the Stream URL box in SportsBuzz!',
+                        '4. Paste that .m3u8 Playback URL into the Stream URL box in Zest!',
                         '5. On the camera phone, open the free "Larix Broadcaster" app (Play Store), enter the Livepeer RTMP URL & Key, and tap the red button to stream!',
                       ],
                       quickCopyText: 'https://livepeercdn.studio/hls/YOUR_STREAM_ID/index.m3u8',
@@ -155,7 +158,7 @@ class StreamGuideDialog extends StatelessWidget {
                       steps: const [
                         '1. Open studio.youtube.com in your browser (use "Desktop site" on phone).',
                         '2. Click "Create" ➔ "Go Live" and copy your public YouTube watch link (e.g. https://youtube.com/watch?v=...).',
-                        '3. Paste the YouTube link into the Stream URL box in SportsBuzz.',
+                        '3. Paste the YouTube link into the Stream URL box in Zest.',
                         '4. Copy the YouTube RTMP Stream Key into Larix Broadcaster or Prism Live on your camera phone and start streaming!',
                       ],
                       quickCopyText: 'https://youtube.com/watch?v=VIDEO_ID',
@@ -178,7 +181,7 @@ class StreamGuideDialog extends StatelessWidget {
                       steps: const [
                         '1. Download the Twitch app on your camera phone and create a channel (e.g. "plexus_sports").',
                         '2. Tap "Go Live" in the Twitch app.',
-                        '3. Paste your Twitch channel URL: https://twitch.tv/YOUR_CHANNEL_NAME into SportsBuzz!',
+                        '3. Paste your Twitch channel URL: https://twitch.tv/YOUR_CHANNEL_NAME into Zest!',
                       ],
                       quickCopyText: 'https://twitch.tv/YOUR_CHANNEL_NAME',
                       quickCopyLabel: 'Twitch URL format',
@@ -212,8 +215,9 @@ class StreamGuideDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _MethodCard extends StatelessWidget {

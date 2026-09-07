@@ -1,11 +1,11 @@
 {
-    "name": "sportsbuzz",
-    "short_name": "sportsbuzz",
+    "name": "Zest",
+    "short_name": "Zest",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FF6E00",
+    "description": "Zest - Campus Sports Scoring & Live Streaming",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sportsbuzz/features/matches/models/sport_score.dart';
-import 'package:sportsbuzz/features/sports/models/scoring_model.dart';
+import 'package:zest/features/matches/models/sport_score.dart';
+import 'package:zest/features/sports/models/scoring_model.dart';
 
 void main() {
   group('SportScore Sealed Hierarchy Serialization Tests', () {

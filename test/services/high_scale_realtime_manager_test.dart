@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sportsbuzz/core/services/high_scale_realtime_manager.dart';
-import 'package:sportsbuzz/features/matches/models/match_state_model.dart';
-import 'package:sportsbuzz/features/matches/models/match_status.dart';
-import 'package:sportsbuzz/features/matches/models/sport_score.dart';
+import 'package:zest/core/services/high_scale_realtime_manager.dart';
+import 'package:zest/features/matches/models/match_state_model.dart';
+import 'package:zest/features/matches/models/match_status.dart';
+import 'package:zest/features/matches/models/sport_score.dart';
 
 void main() {
   group('HighScaleRealtimeManager Tests', () {
