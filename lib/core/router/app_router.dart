@@ -10,6 +10,8 @@ import '../../presentation/screens/admin/admin_dashboard_screen.dart';
 import '../../presentation/screens/admin/admin_event_detail_screen.dart';
 import '../../presentation/screens/admin/admin_scoring_screen.dart';
 
+import '../../presentation/screens/legal/public_legal_screen.dart';
+
 class _GoRouterRefreshStream extends ChangeNotifier {
   _GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
@@ -35,7 +37,14 @@ class AppRouter {
     refreshListenable: _GoRouterRefreshStream(AuthService.onAuthStateChange),
     redirect: (BuildContext context, GoRouterState state) {
       final isLoggedIn = AuthService.currentProfile != null;
-      final isLoginRoute = state.matchedLocation == '/login';
+      final loc = state.matchedLocation;
+      final isLoginRoute = loc == '/login';
+      final isPublicLegalRoute = loc.startsWith('/privacy') || loc.startsWith('/terms');
+
+      // Allow public legal documents to be viewed without authentication
+      if (isPublicLegalRoute) {
+        return null;
+      }
 
       // If not logged in, enforce authentication gate
       if (!isLoggedIn && !isLoginRoute) {
@@ -50,6 +59,35 @@ class AppRouter {
       return null;
     },
     routes: <RouteBase>[
+      // Public Legal Documents (Privacy Policy & Terms of Service)
+      GoRoute(
+        path: '/privacy',
+        name: 'privacy',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
+        path: '/privacy.html',
+        name: 'privacyHtml',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
+        path: '/terms',
+        name: 'terms',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.terms);
+        },
+      ),
+      GoRoute(
+        path: '/terms.html',
+        name: 'termsHtml',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.terms);
+        },
+      ),
       // Authentication Gate Screen
       GoRoute(
         path: '/login',
