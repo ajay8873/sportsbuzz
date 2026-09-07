@@ -10,6 +10,6 @@ void main() {
       ),
     );
 
-    expect(find.text('ZEST'), findsOneWidget);
+    expect(find.text('Zest'), findsOneWidget);
   });
 }

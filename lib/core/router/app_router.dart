@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/auth_service.dart';
+import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/home_screen.dart';
 import '../../presentation/screens/event_landing_screen.dart';
 import '../../presentation/screens/viewer_match_screen.dart';
@@ -7,13 +10,55 @@ import '../../presentation/screens/admin/admin_dashboard_screen.dart';
 import '../../presentation/screens/admin/admin_event_detail_screen.dart';
 import '../../presentation/screens/admin/admin_scoring_screen.dart';
 
+class _GoRouterRefreshStream extends ChangeNotifier {
+  _GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
     initialLocation: '/',
+    refreshListenable: _GoRouterRefreshStream(AuthService.onAuthStateChange),
+    redirect: (BuildContext context, GoRouterState state) {
+      final isLoggedIn = AuthService.currentProfile != null;
+      final isLoginRoute = state.matchedLocation == '/login';
+
+      // If not logged in, enforce authentication gate
+      if (!isLoggedIn && !isLoginRoute) {
+        return '/login';
+      }
+
+      // If logged in and visiting /login, proceed to home
+      if (isLoggedIn && isLoginRoute) {
+        return '/';
+      }
+
+      return null;
+    },
     routes: <RouteBase>[
-      // Public / Viewer Routes
+      // Authentication Gate Screen
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LoginScreen();
+        },
+      ),
+      // Public / Home Feed Route
       GoRoute(
         path: '/',
         name: 'home',

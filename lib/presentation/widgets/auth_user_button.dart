@@ -137,23 +137,7 @@ class AuthUserButton extends ConsumerWidget {
     final isSuperAdmin = ref.watch(isSuperAdminProvider);
 
     if (user == null) {
-      return TextButton.icon(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
-          backgroundColor: AppColors.surface,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: AppColors.border),
-          ),
-        ),
-        icon: const Icon(LucideIcons.logIn, size: 15, color: AppColors.primary),
-        label: const Text(
-          'Sign In',
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-        ),
-        onPressed: () => _showSignInDialog(context),
-      );
+      return const SizedBox.shrink();
     }
 
     final initial = (user.displayName?.isNotEmpty == true
