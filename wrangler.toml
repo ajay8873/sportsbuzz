@@ -1,4 +1,4 @@
-name = "zest"
+name = "zest-app"
 compatibility_date = "2026-08-30"
 pages_build_output_dir = "build/web"
 

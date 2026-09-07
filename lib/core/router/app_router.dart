@@ -39,7 +39,9 @@ class AppRouter {
       final isLoggedIn = AuthService.currentProfile != null;
       final loc = state.matchedLocation;
       final isLoginRoute = loc == '/login';
-      final isPublicLegalRoute = loc.startsWith('/privacy') || loc.startsWith('/terms');
+      final isPublicLegalRoute = loc.startsWith('/privacy') ||
+          loc.startsWith('/policy') ||
+          loc.startsWith('/terms');
 
       // Allow public legal documents to be viewed without authentication
       if (isPublicLegalRoute) {
@@ -75,6 +77,34 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/policy',
+        name: 'policy',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
+        path: '/policy.html',
+        name: 'policyHtml',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacyPolicy',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
+        path: '/privacy-policy.html',
+        name: 'privacyPolicyHtml',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.privacy);
+        },
+      ),
+      GoRoute(
         path: '/terms',
         name: 'terms',
         builder: (BuildContext context, GoRouterState state) {
@@ -84,6 +114,20 @@ class AppRouter {
       GoRoute(
         path: '/terms.html',
         name: 'termsHtml',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.terms);
+        },
+      ),
+      GoRoute(
+        path: '/terms-of-service',
+        name: 'termsOfService',
+        builder: (BuildContext context, GoRouterState state) {
+          return const PublicLegalScreen(docType: LegalDocType.terms);
+        },
+      ),
+      GoRoute(
+        path: '/terms-of-service.html',
+        name: 'termsOfServiceHtml',
         builder: (BuildContext context, GoRouterState state) {
           return const PublicLegalScreen(docType: LegalDocType.terms);
         },
