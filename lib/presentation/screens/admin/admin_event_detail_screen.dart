@@ -207,7 +207,7 @@ class _AdminEventDetailScreenState
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Shared spectator links are view-only. Only the tournament creator (${event.creatorEmail ?? "Organizer"}), authorized co-admins, or global superadmin (${AuthService.superAdminEmail}) can manage fixtures and scoring for "${event.name}".',
+                            'Shared spectator links are view-only. Only the tournament creator (${event.creatorEmail ?? "Organizer"}), authorized co-admins, or global superadmins can manage fixtures and scoring for "${event.name}".',
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.45),
                           ),

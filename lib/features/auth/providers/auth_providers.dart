@@ -23,5 +23,5 @@ final currentUserEmailProvider = Provider<String?>((ref) {
 final isSuperAdminProvider = Provider<bool>((ref) {
   final email = ref.watch(currentUserEmailProvider);
   if (email == null) return false;
-  return email.trim().toLowerCase() == AuthService.superAdminEmail.toLowerCase();
+  return AuthService.isSuperAdminEmail(email);
 });

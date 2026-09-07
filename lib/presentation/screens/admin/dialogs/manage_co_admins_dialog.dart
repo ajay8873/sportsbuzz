@@ -40,8 +40,8 @@ class _ManageCoAdminsDialogState extends ConsumerState<ManageCoAdminsDialog> {
       return;
     }
 
-    if (email == AuthService.superAdminEmail.toLowerCase()) {
-      setState(() => _error = 'This is the global Superadmin email (already has access).');
+    if (AuthService.isSuperAdminEmail(email)) {
+      setState(() => _error = 'This email is a global Superadmin (already has full access).');
       return;
     }
 
@@ -137,10 +137,10 @@ class _ManageCoAdminsDialogState extends ConsumerState<ManageCoAdminsDialog> {
                   children: [
                     const Icon(LucideIcons.crown, color: AppColors.primary, size: 16),
                     const SizedBox(width: 8),
-                    Expanded(
+                    const Expanded(
                       child: Text(
-                        AuthService.superAdminEmail,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                        'Global Superadmins (Supabase SQL)',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                       ),
                     ),
                     Container(

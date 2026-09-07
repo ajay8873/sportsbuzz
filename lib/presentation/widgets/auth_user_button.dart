@@ -10,150 +10,10 @@ class AuthUserButton extends ConsumerWidget {
   const AuthUserButton({super.key});
 
   void _showSignInDialog(BuildContext context) {
-    final emailController = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(LucideIcons.logIn, color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'Account Login',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Sign in to personalize your home feed, manage your hosted tournaments, and access admin consoles.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 16),
-
-              // 1. Google OAuth Sign In Button
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  elevation: 1,
-                  side: const BorderSide(color: AppColors.border),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(LucideIcons.globe, color: Colors.blue, size: 18),
-                label: const Text(
-                  'Continue with Google',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                ),
-                onPressed: () async {
-                  Navigator.of(ctx).pop();
-                  final ok = await AuthService.signInWithGoogle();
-                  if (!ok && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Redirecting to Google Sign-In...'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  const Expanded(child: Divider(color: AppColors.border)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      'OR SIGN IN WITH EMAIL',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted),
-                    ),
-                  ),
-                  const Expanded(child: Divider(color: AppColors.border)),
-                ],
-              ),
-              const SizedBox(height: 14),
-
-              // Quick Superadmin button
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                icon: const Icon(LucideIcons.shieldAlert, size: 16),
-                label: const Text(
-                  'Sign In as Superadmin (mehtaajay8873@gmail.com)',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                ),
-                onPressed: () async {
-                  await AuthService.signInDirect(
-                    email: AuthService.superAdminEmail,
-                    displayName: 'Ajay Mehta (Superadmin)',
-                  );
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                },
-              ),
-              const SizedBox(height: 10),
-
-              // Custom email input
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  hintText: 'user@example.com',
-                  prefixIcon: Icon(LucideIcons.mail, size: 16),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w700)),
-                onPressed: () async {
-                  final email = emailController.text.trim();
-                  if (email.contains('@') && email.contains('.')) {
-                    await AuthService.signInDirect(email: email);
-                    if (ctx.mounted) Navigator.of(ctx).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid email address')),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
+      barrierDismissible: true,
+      builder: (ctx) => const _SignInDialog(),
     );
   }
 
@@ -344,6 +204,368 @@ class AuthUserButton extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SignInDialog extends StatefulWidget {
+  const _SignInDialog();
+
+  @override
+  State<_SignInDialog> createState() => _SignInDialogState();
+}
+
+class _SignInDialogState extends State<_SignInDialog> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isSignUp = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _successMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAutofetchedEmail();
+  }
+
+  Future<void> _loadAutofetchedEmail() async {
+    final email = await AuthService.getAutofetchedEmail();
+    if (mounted && _emailController.text.isEmpty) {
+      setState(() {
+        _emailController.text = email;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() {
+        _errorMessage = 'Please enter a valid email address.';
+        _successMessage = null;
+      });
+      return;
+    }
+
+    if (password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your password.';
+        _successMessage = null;
+      });
+      return;
+    }
+
+    if (_isSignUp && password.length < 6) {
+      setState(() {
+        _errorMessage = 'Password must be at least 6 characters.';
+        _successMessage = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    final result = _isSignUp
+        ? await AuthService.signUpWithPassword(email: email, password: password)
+        : await AuthService.signInWithPassword(email: email, password: password);
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result.success) {
+      if (result.errorMessage != null) {
+        // e.g. Email confirmation notice
+        setState(() {
+          _successMessage = result.errorMessage;
+        });
+      } else {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isSignUp
+                  ? 'Account created and signed in as $email'
+                  : 'Signed in successfully as $email',
+            ),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    } else {
+      setState(() {
+        _errorMessage = result.errorMessage ?? 'Authentication failed.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      titlePadding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primarySurface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _isSignUp ? LucideIcons.userPlus : LucideIcons.logIn,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _isSignUp ? 'Create Account' : 'Account Login',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              _isSignUp
+                  ? 'Create an account to host tournaments, manage scorecards, and personalize feeds.'
+                  : 'Enter your email & password to sign in. Superadmin status is recognized via Supabase.',
+              style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.3),
+            ),
+            const SizedBox(height: 16),
+
+            // Email Address
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Email Address',
+                hintText: 'user@example.com',
+                prefixIcon: const Icon(LucideIcons.mail, size: 16),
+                suffixIcon: _emailController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(LucideIcons.x, size: 14),
+                        onPressed: () {
+                          setState(() {
+                            _emailController.clear();
+                          });
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Password Field
+            TextField(
+              controller: _passwordController,
+              obscureText: !_isPasswordVisible,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _handleSubmit(),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                hintText: _isSignUp ? 'At least 6 characters' : 'Enter password',
+                prefixIcon: const Icon(LucideIcons.lock, size: 16),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Error message banner
+            if (_errorMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.liveRed.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.liveRed.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(LucideIcons.alertCircle, size: 16, color: AppColors.liveRed),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(fontSize: 12, color: AppColors.liveRed, height: 1.3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Success message banner
+            if (_successMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(LucideIcons.checkCircle2, size: 16, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _successMessage!,
+                        style: const TextStyle(fontSize: 12, color: Colors.green, height: 1.3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Sign In / Sign Up Submit Button
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: _isLoading ? null : _handleSubmit,
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : Text(
+                      _isSignUp ? 'Create Account' : 'Sign In',
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                    ),
+            ),
+            const SizedBox(height: 10),
+
+            // Toggle Sign In vs Sign Up
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSignUp = !_isSignUp;
+                    _errorMessage = null;
+                    _successMessage = null;
+                  });
+                },
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+                child: Text(
+                  _isSignUp
+                      ? 'Already have an account? Sign In'
+                      : "Don't have an account yet? Create Account",
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                const Expanded(child: Divider(color: AppColors.border)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    'OR CONTINUE WITH',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const Expanded(child: Divider(color: AppColors.border)),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Google OAuth Button
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+                side: const BorderSide(color: AppColors.border),
+                padding: const EdgeInsets.symmetric(vertical: 11),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              icon: const Icon(LucideIcons.globe, color: Colors.blue, size: 16),
+              label: const Text(
+                'Continue with Google',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              onPressed: () async {
+                final authResult = await AuthService.signInWithGoogle();
+                if (!mounted) return;
+                if (!authResult.success) {
+                  setState(() {
+                    _errorMessage = authResult.errorMessage ??
+                        'Google OAuth is not enabled in the Supabase project dashboard.';
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 }

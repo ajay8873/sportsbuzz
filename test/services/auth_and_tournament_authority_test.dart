@@ -4,6 +4,16 @@ import 'package:zest/core/services/auth_service.dart';
 
 void main() {
   group('Auth and Tournament Authority Tests', () {
+    const testSuperAdminEmail = 'mehtaajay8873@gmail.com';
+
+    setUp(() {
+      AuthService.registerSuperAdminForTesting(testSuperAdminEmail);
+    });
+
+    tearDown(() {
+      AuthService.clearSuperAdminsForTesting();
+    });
+
     final testEvent = EventModel(
       id: 'fest-001',
       name: 'Plexus 2026 Sports Meet',
@@ -16,8 +26,9 @@ void main() {
       adminEmails: ['coadmin1@college.edu', 'coadmin2@college.edu'],
     );
 
-    test('Superadmin has global tournament admin authority', () {
-      expect(testEvent.canUserAdmin('mehtaajay8873@gmail.com'), isTrue);
+    test('Superadmin verified from Supabase SQL has global tournament admin authority', () {
+      expect(AuthService.isSuperAdminEmail(testSuperAdminEmail), isTrue);
+      expect(testEvent.canUserAdmin(testSuperAdminEmail), isTrue);
       expect(testEvent.canUserAdmin('MEHTAAJAY8873@GMAIL.COM '), isTrue);
     });
 
@@ -51,12 +62,13 @@ void main() {
       expect(reconstructed.adminPin, equals('4321'));
       expect(reconstructed.canUserAdmin('creator@sportsfest.edu'), isTrue);
       expect(reconstructed.canUserAdmin('coadmin1@college.edu'), isTrue);
-      expect(reconstructed.canUserAdmin('mehtaajay8873@gmail.com'), isTrue);
+      expect(reconstructed.canUserAdmin(testSuperAdminEmail), isTrue);
       expect(reconstructed.canUserAdmin('intruder@random.com'), isFalse);
     });
 
-    test('AuthService superAdminEmail constant is mehtaajay8873@gmail.com', () {
-      expect(AuthService.superAdminEmail, equals('mehtaajay8873@gmail.com'));
+    test('Other people and fresh installs do not prefill any email', () async {
+      final email = await AuthService.getAutofetchedEmail();
+      expect(email, isEmpty);
     });
   });
 }

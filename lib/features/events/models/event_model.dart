@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../../core/services/auth_service.dart';
 import 'fest_points_model.dart';
 
 class EventModel {
@@ -33,8 +34,8 @@ class EventModel {
   bool canUserAdmin(String? email) {
     if (email == null || email.trim().isEmpty) return false;
     final normalized = email.trim().toLowerCase();
-    // Superadmin has global authority
-    if (normalized == 'mehtaajay8873@gmail.com') return true;
+    // Global superadmins configured in Supabase SQL have universal tournament access
+    if (AuthService.isSuperAdminEmail(normalized)) return true;
     // Creator is primary tournament admin
     if (creatorEmail != null && creatorEmail!.trim().toLowerCase() == normalized) return true;
     // Co-admins explicitly authorized by tournament admin
